@@ -1,0 +1,4 @@
+current.c:43:6:adc_ReadData	2
+current.c:58:6:adc_int2flt	2
+current.c:72:6:adc_EWMAverage	2
+current.c:92:6:adc_GetValue	1

@@ -1,0 +1,49 @@
+/*
+ * comm.c
+ *
+ *  Created on: Mar 24, 2024
+ *      Author: amay
+ */
+
+#include "math.h"
+#include "main.h"
+#include "util.h"
+#include "comm.h"
+
+
+//====================================================================
+//			RX IDENTIFIERS TABLE
+//====================================================================
+//ALL UNSIGNED CHAR
+#define ID_RX_START			(unsigned char)0x01
+#define ID_RX_STOP			(unsigned char)0x02
+#define ID_RX_PWM_START		(unsigned char)0x03
+#define ID_RX_PWM_STOP		(unsigned char)0x04
+#define ID_RX_PWM_SET		(unsigned char)0x05
+#define ID_RX_DIR			(unsigned char)0x06
+
+//====================================================================
+//			TX IDENTIFIERS TABLE
+//====================================================================
+//ALL UNSIGNED CHAR
+
+#define ID_TX_ADC			(unsigned char)0x10
+#define ID_TX_PWM			(unsigned char)0x11
+#define ID_TX_RPM			(unsigned char)0x12
+#define ID_TX_DIR			(unsigned char)0x13
+
+
+uint8_t rec_buf[2];
+uint8_t rec_buf6[2]="";
+int put_char(int);
+
+extern void dyn_rcv_cb(uint8_t car);
+
+
+void dataPreparation(uint8_t * source, uint8_t * destination)
+{
+	//DATA_FORMAT : tx_data[x] = [ID_TX_TypeOfData]+[TypeOfData_0]+...+[TypeOfData_n]+[ID_TX_TypeOfData...]+...
+}
+
+
+

@@ -1,0 +1,4 @@
+../Core/Src/current.c:43:6:adc_ReadData	24	static
+../Core/Src/current.c:58:6:adc_int2flt	24	static
+../Core/Src/current.c:72:6:adc_EWMAverage	32	static
+../Core/Src/current.c:92:6:adc_GetValue	72	static

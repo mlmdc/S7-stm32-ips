@@ -1,0 +1,12 @@
+# Ignorer tous les fichiers .log
+*.log
+
+# Ignorer le fichier test.log
+test.log
+
+# Ignorer tous les fichiers .log sous le répertoire "/logs/"
+/logs/*.log
+
+/MCC_IPS/Drivers/
+
+/MCC_IPS/.settings/
