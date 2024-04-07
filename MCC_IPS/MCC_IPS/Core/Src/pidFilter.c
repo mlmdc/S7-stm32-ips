@@ -72,7 +72,6 @@ void pidFilter_setKd(float new_Kd)
 void pidFilter_compute(void)
 {
 	/* set k-1 */
-
 	Oe_k[2] = Oe_k[1];
 	Oe_k[1] = Oe_k[0];
 	Oe_k[0] = command - output_speed;
@@ -80,8 +79,13 @@ void pidFilter_compute(void)
 	Uc_k[1] = Uc_k[0];
 
 	/* calculate Uc(z) */
-
 	Uc_k[0] = (b2/a2)*Oe_k[0] + (b1/a2)*Oe_k[1] + (b0/a2)*Oe_k[2] - (a1/a2)*Uc_k[1];
 
+	/* no negative voltage */
+	if (Uc_k[0] <= 0.0f)
+	{
+		Uc_k[0] = 0.0f;
+	}
 	/* PWM new duty */
+	//pwm_SetVoltage(Uc_k[0]);
 }

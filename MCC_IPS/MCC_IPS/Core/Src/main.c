@@ -56,11 +56,8 @@
 
 /* USER CODE BEGIN PV */
 
-uint8_t tx_data[8];
-uint8_t rx_data[8];
-float adc_value;
-volatile uint16_t PWM_Value;
 volatile uint32_t ms_value = 0;
+unsigned char rx_data[8];
 
 uint32_t test;
 
@@ -145,12 +142,11 @@ int main(void)
 
 
   /* PID Init */
-
-  //RENDERING THE PROJECT NON-FUNCTIONAL
   pidFilter_param_init();
-
   printf("PID INIT PASSED\n\r");
 
+  /* USART RECEPTION */
+  HAL_USART_Receive_IT(&husart2, rx_data, 8);
 
   //TIM2 Global interruptions
   tickTimer_Init(10); // period in ms
@@ -252,9 +248,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	//====================================================================
 	// Constante de temps mécanique tm : 13ms
 	// Stabilisation du moteur après sa commande : 5*tm
-	if ((ms_value >= 13*5) &&  (ms_value <= 13*5+2))
+	if (((ms_value % 7) >= 0) &&  ((ms_value % 7 ) <= 1))
 	{
-		//encoder_GetSpeed();
+		encoder_GetSpeed();
 		//printf("MOTOR SPEED %f \n\r", output_speed);
 		pidFilter_compute();
 	}

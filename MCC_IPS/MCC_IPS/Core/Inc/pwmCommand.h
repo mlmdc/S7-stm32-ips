@@ -14,6 +14,8 @@
 //			COMMANDE PWM
 //====================================================================
 
+extern volatile uint32_t PWM_Value;
+
 uint32_t pulseCalc(float val);
 
 void pwm_Init(void);

@@ -5,12 +5,12 @@
  *      Author: amay
  */
 
-#include "math.h"
-#include "string.h"
+
 #include "main.h"
 #include "comm.h"
 #include "speed.h"
 #include "current.h"
+#include "usart.h"
 #include "pwmCommand.h"
 
 
@@ -41,10 +41,10 @@
 //====================================================================
 //ALL UNSIGNED CHAR
 //ID size = 4 chars
-#define ID_TX_ADC			(unsigned char)0x10
-#define ID_TX_PWM			(unsigned char)0x11
-#define ID_TX_RPM			(unsigned char)0x12
-#define ID_TX_DIR			(unsigned char)0x13
+#define ID_TX_ADC			(unsigned int)0x10
+#define ID_TX_PWM			(unsigned int)0x11
+#define ID_TX_RPM			(unsigned int)0x12
+#define ID_TX_DIR			(unsigned int)0x13
 
 
 uint8_t rec_buf[2];
@@ -59,12 +59,16 @@ void dataPreparation(uint8_t * source, uint8_t * destination)
 {
 	//DATA_FORMAT : tx_data[x] = [ID_TX_TypeOfData]+[TypeOfData_0]+...+[TypeOfData_n]+[ID_TX_TypeOfData...]+...
 
-	//int snprintf(char* s, size_t n, const char* format, ...);
-	//snprintf()
+	/* ADC */
+	printf("%x", ID_TX_ADC); //hex id
+	printf("%f", ADC_LastValue);
+	/* PWM */
+	printf("%x", ID_TX_PWM); //hex id
+	printf("%u", (unsigned int)PWM_Value); //uchar typecast for warning
+	/* PWM */
+	printf("%x", ID_TX_RPM); //hex id
+	printf("%f", output_speed);
 
-	//char 	*strcat (char *__restrict, const char *__restrict);
-	//strcat()
+	printf("\n\r");
 }
-
-
 
