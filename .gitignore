@@ -7,6 +7,8 @@ test.log
 # Ignorer tous les fichiers .log sous le répertoire "/logs/"
 /logs/*.log
 
-/MCC_IPS/Drivers/
+/MCC_IPS/MCC_IPS/Drivers/
 
-/MCC_IPS/.settings/
+/MCC_IPS/MCC_IPS/.settings/
+
+/MCC_IPS/.metadata/*

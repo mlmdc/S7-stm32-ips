@@ -8,7 +8,6 @@
 #include "math.h"
 #include "string.h"
 #include "main.h"
-#include "util.h"
 #include "comm.h"
 #include "speed.h"
 #include "current.h"

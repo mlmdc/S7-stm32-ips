@@ -18,7 +18,7 @@
 volatile float Kp;
 volatile float Kd;
 volatile float Ki;
-volatile uint32_t te_ms;
+/*volatile*/ uint32_t te_ms;
 volatile float Oe_k[3] = {0,0,0};
 volatile float Uc_k[2] = {0,0};
 volatile float command;

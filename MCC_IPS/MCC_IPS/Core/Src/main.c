@@ -60,7 +60,7 @@ uint8_t tx_data[8];
 uint8_t rx_data[8];
 float adc_value;
 volatile uint16_t PWM_Value;
-volatile uint32_t ms_value;
+volatile uint32_t ms_value = 0;
 
 uint32_t test;
 
@@ -120,30 +120,41 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
-  MX_TIM4_Init();
-  MX_TIM5_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start(&htim1);
-
+  printf("\n\r=== NEW SESSION ===\n\r");
   //INIT PERSOS
   pwm_Init();
   pwm_SetDuty(10.0f);
+  printf("PWM INIT PASSED\n\r");
 
   /* ENCODER SPEED Init */
   encoder_Init();
+  printf("ENCODER INIT PASSED\n\r");
+
 
   /* MCC Set Direction */
   mcc_setCW();
+  printf("CW INIT PASSED\n\r");
+
 
   /* DMA ADC INIT*/
   current_Init();
+  printf("ADC COMPUTE INIT PASSED\n\r");
+
 
   /* PID Init */
+
+  //RENDERING THE PROJECT NON-FUNCTIONAL
   pidFilter_param_init();
+
+  printf("PID INIT PASSED\n\r");
+
 
   //TIM2 Global interruptions
   tickTimer_Init(10); // period in ms
+  printf("tickTimer2 INIT PASSED\n\r");
 
   /* USER CODE END 2 */
 
@@ -154,6 +165,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+
   }
   /* USER CODE END 3 */
 }
@@ -230,9 +242,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 * 4. Envoi des données
 	 */
 
-
+	/*
 	encoder_GetSpeed();
+	adc_GetValue();
 	printf("MOTOR SPEED %f \n\r", output_speed);
+	*/
 	//====================================================================
 	//			PID Filter
 	//====================================================================
@@ -240,8 +254,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	// Stabilisation du moteur après sa commande : 5*tm
 	if ((ms_value >= 13*5) &&  (ms_value <= 13*5+2))
 	{
-		encoder_GetSpeed();
-		printf("MOTOR SPEED %f \n\r", output_speed);
+		//encoder_GetSpeed();
+		//printf("MOTOR SPEED %f \n\r", output_speed);
 		pidFilter_compute();
 	}
 
@@ -251,6 +265,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (ms_value >= 100)
 	{
 		ms_value = 0;
+		adc_GetValue();
+		printf("ADC VALUE %f \n\r", ADC_LastValue);
 	}
 }
 

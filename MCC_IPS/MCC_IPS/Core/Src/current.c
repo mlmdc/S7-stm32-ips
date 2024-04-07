@@ -43,6 +43,11 @@ extern uint32_t test;
 
 void current_Init(void)
 {
+	/*
+	 * Tconv = (Sampling_Time + 12Bits)/(APB2_CLOCK/4) *
+	 */
+
+	ADC1->SMPR2 |= (uint32_t)(0x7); //SET SAMPLING TIME TO 480 CYCLES, FCONV = 42.7 kHz, TCONV = 2.342 10^-5 s
 	HAL_ADC_Start_DMA (&hadc1, &ADC_DATA_BUFFER, 1);
 }
 
