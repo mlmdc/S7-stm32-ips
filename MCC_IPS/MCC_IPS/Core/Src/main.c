@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "adc.h"
+#include "dma.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -28,6 +29,8 @@
 #include "comm.h"
 #include "current.h"
 #include "pwmCommand.h"
+#include "mccCommand.h"
+#include "pidFilter.h"
 #include "speed.h"
 #include "tickTimer.h"
 #include <stdio.h>
@@ -56,6 +59,10 @@
 uint8_t tx_data[8];
 uint8_t rx_data[8];
 float adc_value;
+volatile uint16_t PWM_Value;
+volatile uint32_t ms_value;
+
+uint32_t test;
 
 /* USER CODE END PV */
 
@@ -70,7 +77,7 @@ void SystemClock_Config(void);
 
 PUTCHAR_PROTOTYPE
 {
-	HAL_USART_Transmit(&husart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY);
+	HAL_USART_Transmit(&husart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY); //FOR DELAY
 	return ch;
 }
 /* USER CODE END PFP */
@@ -108,6 +115,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
@@ -116,12 +124,27 @@ int main(void)
   MX_TIM5_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start(&htim1);
 
-  //Enabling the interrupt and starting ADC conversion
-  HAL_ADC_Start_IT(&hadc1);
+  //INIT PERSOS
+  pwm_Init();
+  pwm_SetDuty(10.0f);
 
-  //TIM3 Global interruptions
-  tickTimer_Init(100); // period in ms
+  /* ENCODER SPEED Init */
+  encoder_Init();
+
+  /* MCC Set Direction */
+  mcc_setCW();
+
+  /* DMA ADC INIT*/
+  current_Init();
+
+  /* PID Init */
+  pidFilter_param_init();
+
+  //TIM2 Global interruptions
+  tickTimer_Init(10); // period in ms
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -129,8 +152,7 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-	HAL_Delay(1000);
-	printf("%s\n\r", "TEST IPS");
+
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -190,6 +212,10 @@ void SystemClock_Config(void)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+	//====================================================================
+	//			ms count
+	//====================================================================
+	ms_value++;
 	/*
 	 * Protocole données :
 	 * 1. Récupération des données
@@ -203,9 +229,29 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 *
 	 * 4. Envoi des données
 	 */
-	//HAL_USART_Transmit_IT(&husart2, tx_data, sizeof(tx_data));
-	adc_GetValue();
-	printf("ADC VALUE = %.3f\n\r",ADC_LastValue);
+
+
+	encoder_GetSpeed();
+	printf("MOTOR SPEED %f \n\r", output_speed);
+	//====================================================================
+	//			PID Filter
+	//====================================================================
+	// Constante de temps mécanique tm : 13ms
+	// Stabilisation du moteur après sa commande : 5*tm
+	if ((ms_value >= 13*5) &&  (ms_value <= 13*5+2))
+	{
+		encoder_GetSpeed();
+		printf("MOTOR SPEED %f \n\r", output_speed);
+		pidFilter_compute();
+	}
+
+	//====================================================================
+	//			ms_count reset
+	//====================================================================
+	if (ms_value >= 100)
+	{
+		ms_value = 0;
+	}
 }
 
 //====================================================================

@@ -1,0 +1,33 @@
+/*
+ * filter.h
+ *
+ *  Created on: Apr 7, 2024
+ *      Author: amay
+ */
+
+#ifndef INC_FILTER_H_
+#define INC_FILTER_H_
+
+//====================================================================
+//			PID
+//====================================================================
+
+extern volatile float Kp;
+extern volatile float Kd;
+extern volatile float Ki;
+extern volatile uint32_t te_ms;
+extern volatile float Oe_k[3];
+extern volatile float Uc_k[2];
+extern volatile float command;
+
+void filter_init(void);
+
+void filter_setKp(float new_Kp);
+
+void filter_setKi(float new_Ki);
+
+void filter_setKd(float new_Kd);
+
+void filter_compute(void);
+
+#endif /* INC_FILTER_H_ */

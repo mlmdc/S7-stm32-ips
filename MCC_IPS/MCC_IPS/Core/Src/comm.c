@@ -6,9 +6,24 @@
  */
 
 #include "math.h"
+#include "string.h"
 #include "main.h"
 #include "util.h"
 #include "comm.h"
+#include "speed.h"
+#include "current.h"
+#include "pwmCommand.h"
+
+
+//====================================================================
+//			SIZE
+//====================================================================
+
+#define ID_CHAR_SIZE 4
+#define FLOAT_CHAR_SIZE 16
+#define INT_CHAR_SIZE 8
+#define UINT32_CHAR_SIZE 16
+#define UINT16_CHAR_SIZE 8
 
 
 //====================================================================
@@ -26,7 +41,7 @@
 //			TX IDENTIFIERS TABLE
 //====================================================================
 //ALL UNSIGNED CHAR
-
+//ID size = 4 chars
 #define ID_TX_ADC			(unsigned char)0x10
 #define ID_TX_PWM			(unsigned char)0x11
 #define ID_TX_RPM			(unsigned char)0x12
@@ -40,9 +55,16 @@ int put_char(int);
 extern void dyn_rcv_cb(uint8_t car);
 
 
+
 void dataPreparation(uint8_t * source, uint8_t * destination)
 {
 	//DATA_FORMAT : tx_data[x] = [ID_TX_TypeOfData]+[TypeOfData_0]+...+[TypeOfData_n]+[ID_TX_TypeOfData...]+...
+
+	//int snprintf(char* s, size_t n, const char* format, ...);
+	//snprintf()
+
+	//char 	*strcat (char *__restrict, const char *__restrict);
+	//strcat()
 }
 
 

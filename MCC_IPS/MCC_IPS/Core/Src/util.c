@@ -1,4 +1,5 @@
 #include "util.h"
+#include "math.h"
 
 //=================================================================
 void num2str(char *s, unsigned int number, unsigned int base, unsigned int size, int sp)

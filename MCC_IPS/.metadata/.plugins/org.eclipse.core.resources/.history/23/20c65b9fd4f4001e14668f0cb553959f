@@ -1,0 +1,53 @@
+/*
+ * pwmCommand.h
+ *
+ *  Created on: Mar 20, 2024
+ *      Author: madec
+ */
+
+#ifndef INC_PWMCOMMAND_H_
+#define INC_PWMCOMMAND_H_
+
+#include "main.h"
+
+//====================================================================
+//			COMMANDE PWM
+//====================================================================
+
+uint32_t pulseCalc(float val);
+
+void pwm_Init(void);
+
+void pwm_SetDuty(float duty);
+
+void pwm_SetVoltage(float voltage);
+
+void pwm_Enable(void);
+
+void pwm_Disable(void);
+
+void pwm_Toggle(void);
+
+//====================================================================
+//			PID
+//====================================================================
+
+extern volatile float Kp;
+extern volatile float Kd;
+extern volatile float Ki;
+extern volatile uint32_t te_ms;
+extern volatile float Oe_k[3];
+extern volatile float Uc_k[2];
+extern volatile float command;
+
+void pid_init(void);
+
+void pid_setKp(float new_Kp);
+
+void pid_setKi(float new_Ki);
+
+void pid_setKd(float new_Kd);
+
+void pid_filter(void);
+
+#endif /* INC_PWMCOMMAND_H_ */

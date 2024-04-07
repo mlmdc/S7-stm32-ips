@@ -1,0 +1,102 @@
+/*
+ * speed.c
+ *
+ *  Created on: Mar 20, 2024
+ *      Author: Madec
+ */
+
+/*
+ * A CORRIGER :
+ * 	- Compte des valeurs trop élevé
+ * 	- Calcul de la vitesse
+ */
+
+
+#include "speed.h"
+#include "math.h"
+#include "main.h"
+#include "tim.h"
+#include "gpio.h"
+
+volatile float output_speed;
+
+#define TE_ms 100 //
+#define COUNT_PER_ROUND 500
+#define MAX_CNT_PER_REV ((COUNT_PER_ROUND)*4 - 1)
+
+int32_t Nindex = 0;
+int32_t pos_count = 0;
+uint32_t angle_position[2];
+
+void encoder_Init(void)
+{
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
+	pos_count = 0;
+	Nindex = 0;
+}
+
+
+uint16_t encoder_FetchPosition()
+{
+	int TIMCNT = TIM1->CNT;
+	return (uint16_t)TIMCNT;
+}
+
+void encoder_UpdatePosition()
+{
+	angle_position[1] = angle_position[0];
+	angle_position[0] = Nindex*4*500 +(uint32_t)encoder_FetchPosition();
+}
+
+void encoder_GetSpeed()
+{
+	float speed = 0; //int/s
+	float speed_rad = 0; //rad/s
+	uint32_t delta_pos = 0; //int
+
+	encoder_UpdatePosition(); //fetch the position
+
+	delta_pos = angle_position[0]-angle_position[1];
+	speed = (float)(delta_pos*1000.0f)/(float)(4000*TE_ms);
+
+	speed_rad = speed*(2*3.1415f);
+
+	output_speed = speed_rad;
+
+}
+
+void encoder_CallbackIndex()
+{
+	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
+	{
+		Nindex--;
+		pos_count -= encoder_FetchPosition();
+	}
+	else
+	{
+		Nindex++;
+		pos_count += encoder_FetchPosition();
+	}
+
+	__HAL_TIM_SetCounter(&htim1, 0);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
+
+}
+
+//====================================================================
+//			EXTI PIN 7
+//====================================================================
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(GPIO_Pin == GPIO_PIN_7) {
+	  encoder_CallbackIndex();
+  }
+}
+
+
+
+
+

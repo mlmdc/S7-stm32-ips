@@ -5,6 +5,6 @@
 ../Core/Src/tim.c:213:6:MX_TIM5_Init	32	static
 ../Core/Src/tim.c:253:6:HAL_TIM_Encoder_MspInit	48	static
 ../Core/Src/tim.c:283:6:HAL_TIM_Base_MspInit	32	static
-../Core/Src/tim.c:335:6:HAL_TIM_MspPostInit	40	static
-../Core/Src/tim.c:363:6:HAL_TIM_Encoder_MspDeInit	16	static
-../Core/Src/tim.c:386:6:HAL_TIM_Base_MspDeInit	16	static
+../Core/Src/tim.c:339:6:HAL_TIM_MspPostInit	40	static
+../Core/Src/tim.c:367:6:HAL_TIM_Encoder_MspDeInit	16	static
+../Core/Src/tim.c:390:6:HAL_TIM_Base_MspDeInit	16	static

@@ -1,4 +1,4 @@
-../Core/Src/mccCommand.c:15:6:mcc_setCW	8	static
-../Core/Src/mccCommand.c:20:6:mcc_setCCW	8	static
-../Core/Src/mccCommand.c:25:6:mcc_setBraking	16	static
-../Core/Src/mccCommand.c:30:6:mcc_toggleDir	8	static
+../Core/Src/mccCommand.c:23:6:mcc_setCW	8	static
+../Core/Src/mccCommand.c:28:6:mcc_setCCW	8	static
+../Core/Src/mccCommand.c:33:6:mcc_setBraking	16	static
+../Core/Src/mccCommand.c:38:6:mcc_toggleDir	8	static

@@ -1,6 +1,7 @@
-../Core/Src/pwmCommand.c:15:10:pulseCalc	24	static
-../Core/Src/pwmCommand.c:22:6:pwmInit	24	static
-../Core/Src/pwmCommand.c:56:6:pwmSetDuty	24	static
-../Core/Src/pwmCommand.c:64:6:pwmEnable	8	static
-../Core/Src/pwmCommand.c:69:6:pwmDisable	8	static
-../Core/Src/pwmCommand.c:74:6:pwmToggle	8	static
+../Core/Src/pwmCommand.c:21:10:pulseCalc	24	static
+../Core/Src/pwmCommand.c:44:6:pwm_Init	8	static
+../Core/Src/pwmCommand.c:51:6:pwm_SetDuty	24	static
+../Core/Src/pwmCommand.c:60:6:pwm_SetVoltage	32	static
+../Core/Src/pwmCommand.c:83:6:pwm_Enable	8	static
+../Core/Src/pwmCommand.c:88:6:pwm_Disable	8	static
+../Core/Src/pwmCommand.c:93:6:pwm_Toggle	8	static

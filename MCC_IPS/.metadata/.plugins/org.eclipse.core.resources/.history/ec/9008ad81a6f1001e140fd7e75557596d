@@ -1,0 +1,31 @@
+/*
+ * speed.h
+ *
+ *  Created on: Mar 20, 2024
+ *      Author: madec
+ */
+
+#ifndef INC_SPEED_H_
+#define INC_SPEED_H_
+
+#include "main.h"
+
+//TIM_HandleTypeDef TimEncoderHandle;
+
+extern volatile uint16_t output_speed;
+
+void encoder_Init(void);
+
+void encoder_updatePosition(int * AnglePosition);
+
+uint16_t encoder_GetPos16(void);
+
+uint16_t encoder_GetNTurn16(void);
+
+uint32_t encoder_GetNandPos(void);
+
+int16_t encoder_GetSpeed(void);
+
+void encoder_CallbackIndex();
+
+#endif /* INC_SPEED_H_ */

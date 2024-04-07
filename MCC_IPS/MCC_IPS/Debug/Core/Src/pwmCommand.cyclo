@@ -1,6 +1,7 @@
-pwmCommand.c:15:10:pulseCalc	1
-pwmCommand.c:22:6:pwmInit	1
-pwmCommand.c:56:6:pwmSetDuty	1
-pwmCommand.c:64:6:pwmEnable	1
-pwmCommand.c:69:6:pwmDisable	1
-pwmCommand.c:74:6:pwmToggle	2
+pwmCommand.c:21:10:pulseCalc	4
+pwmCommand.c:44:6:pwm_Init	1
+pwmCommand.c:51:6:pwm_SetDuty	1
+pwmCommand.c:60:6:pwm_SetVoltage	4
+pwmCommand.c:83:6:pwm_Enable	1
+pwmCommand.c:88:6:pwm_Disable	1
+pwmCommand.c:93:6:pwm_Toggle	2

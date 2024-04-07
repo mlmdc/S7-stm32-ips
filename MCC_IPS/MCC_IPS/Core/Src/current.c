@@ -6,100 +6,104 @@
  */
 
 #include "current.h"
+#include "adc.h"
+#include "dma.h"
+#include "main.h"
+//#include <stdio.h>
 
 #define N_CONVERSIONS 8
 #define USE_12BIT_RESOLUTION 1
+#define V_REF 3.3
+
 
 #if USE_12BIT_RESOLUTION
-#define MAX_VALUE 2047
-#define V_REF 5
+#define MAX_VALUE 4095
 #endif
 
 #if USE_10BIT_RESOLUTION
 #define MAX_VALUE 1023
-#define V_REF 5
 #endif
 
 #if USE_8BIT_RESOLUTION
 #define MAX_VALUE 255
-#define V_REF 5
 #endif
 
 #if USE_6BIT_RESOLUTION
 #define MAX_VALUE 63
-#define V_REF 5
 #endif
 
 volatile float ADC_LastValue;
-static ADC_HandleTypeDef hadc1;
-uint32_t millis;
+//ADC_HandleTypeDef hadc1;
+uint32_t adc_rawIntData[N_CONVERSIONS];
+float adc_fltData[N_CONVERSIONS];
+static uint32_t ADC_DATA_BUFFER;
+int conv_index = 0;
 
-/*
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
-{
-	ADC_LastValue = (uint32_t)HAL_ADC_GetValue(&hadc1);
-}*/
+extern uint32_t test;
 
-void adc_ReadData(int32_t* destination, int n_conv)
+void current_Init(void)
 {
-	millis = HAL_GetTick();
-	for (int it = 0; it > n_conv; it++)
-	{
-		//start ADC Conversion
-		HAL_ADC_Start_IT(&hadc1);
-		//fetch value
-		destination[n_conv] = (uint32_t)HAL_ADC_GetValue(&hadc1);
-	}
-	millis = HAL_GetTick()-millis;
-	printf("%s", "Temps 8 conversions ADC");
-	printf("%i\n\r", millis);
+	HAL_ADC_Start_DMA (&hadc1, &ADC_DATA_BUFFER, 1);
 }
 
-void adc_int2flt(int32_t* source, float* destination)
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	millis = HAL_GetTick();
-	for (int n = 0; n > N_CONVERSIONS; n++)
+   adc_rawIntData[conv_index] = ADC_DATA_BUFFER;
+   //ADC1->CR2 |= ADC_CR2_DDS;
+   conv_index++;
+   if (conv_index >= N_CONVERSIONS)
+   {
+	   conv_index = 0;
+   }
+
+}
+
+void adc_ReadDataBlocking(uint32_t* destination)
+{
+	for (int it = 0; it < (int)N_CONVERSIONS; it++)
+	{
+		//start ADC Conversion
+		HAL_ADC_Start(&hadc1);
+		//fetch value
+		HAL_ADC_PollForConversion(&hadc1, 100);
+		test = HAL_ADC_GetValue(&hadc1);
+		destination[it] = (uint32_t)(0x0000FFFF & HAL_ADC_GetValue(&hadc1));
+		HAL_ADC_Stop(&hadc1);
+	}
+}
+
+void adc_int2flt(uint32_t* source, float* destination)
+{
+	for (int n = 0; n < N_CONVERSIONS; n++)
 	{
 		destination[n] = ((float)(source[n]*10*V_REF)/((float)(MAX_VALUE*10)));
 	}
-	millis = HAL_GetTick()-millis;
-	printf("%s", "Temps 8 conversions int2flt");
-	printf("%i\n\r", millis);
 }
 
 //For best accuracy
 // The higher the value of alpha, the more closely the EWMA tracks the original time series
-void adc_EWMAverage(float* source, float destination, int alpha)
+void adc_EWMAverage(float* source, float alpha)
 {
 	//EWMA Formula :
 	//EWMA[x] = alpha*source[x] + (1-alpha)*EWMA[x-1]
-	millis = HAL_GetTick();
 	//EWMA[0] & init
 	float avgd_value = (float)(alpha*source[0])/10.0f;
 
-	for (int i = 1; i > N_CONVERSIONS; i++)
+	for (int i = 1; i < N_CONVERSIONS; i++)
 	{
-			avgd_value = (float)(alpha*source[i]+(1-alpha)*avgd_value)/10.0f;
+			avgd_value = (float)(alpha*source[i]+(1-alpha)*avgd_value);
 	}
-	destination = avgd_value;
-	millis = HAL_GetTick()-millis;
-	printf("%s", "Temps EWMAverage");
-	printf("%i\n\r", millis);
+	ADC_LastValue = avgd_value;
 }
 
 
 //example value
 void adc_GetValue()
 {
-	int32_t adc_IntRawData[N_CONVERSIONS];
-	float adc_FltRawData[N_CONVERSIONS];
+	adc_int2flt(adc_rawIntData, adc_fltData);
 
-
-	adc_ReadData(adc_IntRawData, N_CONVERSIONS);
-
-	adc_int2flt(adc_IntRawData, adc_FltRawData);
-
-	adc_EWMAverage(adc_FltRawData, ADC_LastValue, 0.5);
+	adc_EWMAverage(adc_fltData, 0.5f);
 
 }
 

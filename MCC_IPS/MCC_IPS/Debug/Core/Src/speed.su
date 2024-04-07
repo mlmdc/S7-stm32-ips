@@ -1,7 +1,6 @@
-../Core/Src/speed.c:21:6:encoder_Init	48	static
-../Core/Src/speed.c:50:6:encoder_updatePosition	24	static
-../Core/Src/speed.c:58:10:encoder_GetPos16	16	static
-../Core/Src/speed.c:64:10:encoder_GetNTurn16	16	static
-../Core/Src/speed.c:71:10:encoder_GetNandPos	24	static
-../Core/Src/speed.c:78:9:encoder_GetSpeed	16	static
-../Core/Src/speed.c:115:6:encoder_CallbackIndex	8	static
+../Core/Src/speed.c:33:6:encoder_Init	8	static
+../Core/Src/speed.c:48:10:encoder_FetchPosition	16	static
+../Core/Src/speed.c:54:6:encoder_UpdatePosition	16	static
+../Core/Src/speed.c:60:6:encoder_GetSpeed	16	static
+../Core/Src/speed.c:98:6:encoder_CallbackIndex	8	static
+../Core/Src/speed.c:122:6:HAL_GPIO_EXTI_Callback	16	static

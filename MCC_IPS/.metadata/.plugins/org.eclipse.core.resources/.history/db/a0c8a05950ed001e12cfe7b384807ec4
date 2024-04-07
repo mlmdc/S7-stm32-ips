@@ -1,0 +1,113 @@
+/*
+ * current.c
+ *
+ *  Created on: Mar 20, 2024
+ *      Author: amay
+ */
+
+#include "current.h"
+#include "adc.h"
+#include "dma.h"
+#include "main.h"
+#include <stdio.h>
+
+#define N_CONVERSIONS 8
+#define USE_12BIT_RESOLUTION 1
+#define V_REF 3.3
+
+
+#if USE_12BIT_RESOLUTION
+#define MAX_VALUE 4095
+#endif
+
+#if USE_10BIT_RESOLUTION
+#define MAX_VALUE 1023
+#endif
+
+#if USE_8BIT_RESOLUTION
+#define MAX_VALUE 255
+#endif
+
+#if USE_6BIT_RESOLUTION
+#define MAX_VALUE 63
+#endif
+
+volatile float ADC_LastValue;
+//ADC_HandleTypeDef hadc1;
+uint32_t adc_rawIntData[N_CONVERSIONS];
+static uint32_t ADC_DATA_BUFFER;
+int conv_index = 0;
+
+extern uint32_t test;
+
+void current_Init(void)
+{
+	HAL_ADC_Start_DMA (&hadc1, &ADC_DATA_BUFFER, 1);
+}
+
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+   rawIntData[conv_index] = ADC_DATA_BUFFER;
+   conv_index++;
+   if (conv_index >= N_CONVERSIONS)
+   {
+	   conv_index = 0;
+   }
+
+}
+
+void adc_ReadDataBlocking(uint32_t* destination)
+{
+	for (int it = 0; it < (int)N_CONVERSIONS; it++)
+	{
+		//start ADC Conversion
+		HAL_ADC_Start(&hadc1);
+		//fetch value
+		HAL_ADC_PollForConversion(&hadc1, 100);
+		test = HAL_ADC_GetValue(&hadc1);
+		destination[it] = (uint32_t)(0x0000FFFF & HAL_ADC_GetValue(&hadc1));
+		HAL_ADC_Stop(&hadc1);
+	}
+}
+
+void adc_int2flt(uint32_t* source, float* destination)
+{
+	for (int n = 0; n < N_CONVERSIONS; n++)
+	{
+		destination[n] = ((float)(source[n]*10*V_REF)/((float)(MAX_VALUE*10)));
+	}
+}
+
+//For best accuracy
+// The higher the value of alpha, the more closely the EWMA tracks the original time series
+void adc_EWMAverage(float* source, float alpha)
+{
+	//EWMA Formula :
+	//EWMA[x] = alpha*source[x] + (1-alpha)*EWMA[x-1]
+	//EWMA[0] & init
+	float avgd_value = (float)(alpha*source[0])/10.0f;
+
+	for (int i = 1; i < N_CONVERSIONS; i++)
+	{
+			avgd_value = (float)(alpha*source[i]+(1-alpha)*avgd_value);
+	}
+	ADC_LastValue = avgd_value;
+}
+
+
+//example value
+void adc_GetValue()
+{
+	//uint32_t adc_IntRawData[N_CONVERSIONS];
+	float adc_FltRawData[N_CONVERSIONS];
+
+
+	//adc_ReadDataBlocking(adc_IntRawData);
+
+	adc_int2flt(adc_rawIntData, adc_FltRawData);
+
+	adc_EWMAverage(adc_FltRawData, 0.5f);
+
+}
+

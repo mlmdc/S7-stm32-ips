@@ -18,9 +18,9 @@ void tickTimer_Init(int period)
 	unsigned int uwPrescalerValue;
 
 	//Compute the prescaler value to have counter clock equal to 10 KHz */
-	uwPrescalerValue = (unsigned int) ((SystemCoreClock / 10000) - 1);
+	uwPrescalerValue = (uint32_t)8399;
 
-	TimHandle_period.Instance = TIM3;
+	TimHandle_period.Instance = TIM2;
 
 	TimHandle_period.Init.Period = 10*period;
 	TimHandle_period.Init.Prescaler = uwPrescalerValue;

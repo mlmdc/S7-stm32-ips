@@ -5,132 +5,127 @@
  *      Author: Madec
  */
 
-#define TE_ms 5 //
-#define COUNT_PER_ROUND 1000
-#define MAX_CNT_PER_REV ((COUNT_PER_ROUND)*4 - 1)
-#define MAX_COUNT (int)(((unsigned long)MAX_CNT_PER_REV*8192)/1000)
-#define HALF_MAX_COUNT (MAX_COUNT >> 1)
-#define COEFF 8192
+/*
+ * A CORRIGER :
+ * 	- Compte des valeurs trop élevé
+ */
 
 #include "speed.h"
+#include "main.h"
+#include "tim.h"
+#include "gpio.h"
 
-TIM_HandleTypeDef TimEncoderHandle;
+volatile float output_speed;
 
-static int index = 0;
+#define N_MEASURES 8
+#define M_PI (float)3.141592653589793
+#define TE_ms 100 //
+#define COUNT_PER_ROUND 500
+#define MAX_CNT_PER_REV ((COUNT_PER_ROUND)*4 - 1)
+#define MAX_COUNT 2000
+#define HALF_MAX_COUNT (MAX_COUNT>>1)
 
-void encoder_Init(void){
+int32_t Nindex;
+int32_t pos_count;
+uint32_t angle_position[2];
+float speed;
 
-	TIM_Encoder_InitTypeDef sConfig;
+void encoder_Init(void)
+{
+	/* VALUES INIT */
+	pos_count = 0;
+	Nindex = 0;
+	speed = 0;
+	angle_position[0] = 0;
+	angle_position[1] = 0;
 
-	TimEncoderHandle.Instance = TIM1;
-	TimEncoderHandle.Init.Prescaler = 0;
-	TimEncoderHandle.Init.CounterMode = TIM_COUNTERMODE_UP;
-	TimEncoderHandle.Init.Period = COUNT_PER_ROUND*4;
-	TimEncoderHandle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-
-	sConfig.EncoderMode = TIM_ENCODERMODE_TI12;
-	//TIM1 Channel1 Mode
-	sConfig.IC1Polarity = TIM_INPUTCHANNELPOLARITY_RISING;
-	sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
-	sConfig.IC1Prescaler = TIM_ICPSC_DIV4;
-	sConfig.IC1Filter = 0x0F;
-	//TIM1 Channel2 Mode
-	sConfig.IC2Polarity = TIM_INPUTCHANNELPOLARITY_RISING;
-	sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
-	sConfig.IC2Prescaler = TIM_ICPSC_DIV4;
-	sConfig.IC2Filter = 0x0F;
-
-	HAL_TIM_Encoder_Init(&TimEncoderHandle, &sConfig);
-	HAL_TIM_Encoder_Start(&TimEncoderHandle, TIM_CHANNEL_1);
-	HAL_TIM_Encoder_Start(&TimEncoderHandle, TIM_CHANNEL_2);
-
+	/* ENCODER INIT */
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
 }
 
 
-void encoder_updatePosition(int * AnglePosition)
+uint16_t encoder_FetchPosition()
 {
 	int TIMCNT = TIM1->CNT;
-	AnglePosition[1] = AnglePosition[0];
-	//AnglePosition[0] = int
-	AnglePosition[0] = (unsigned int)(((unsigned long)TIMCNT * COEFF)/1000);
+	return (uint16_t)TIMCNT;
 }
 
-uint16_t encoder_GetPos16(void)
+void encoder_UpdatePosition()
 {
-	int TIMCNT = TIM1->CNT;
-	return (uint16_t)(TIMCNT);
+	angle_position[1] = angle_position[0];
+	angle_position[0] = Nindex*4*COUNT_PER_ROUND +(uint32_t)encoder_FetchPosition();
 }
 
-uint16_t encoder_GetNTurn16(void)
+void encoder_GetSpeed()
 {
-	uint16_t pos = 0;
-	pos = index*4*COUNT_PER_ROUND;
-	return pos;
-}
+	float delta_pos = 0; //init
 
-uint32_t encoder_GetNandPos(void)
-{
-	uint32_t NPos = 0;
-	NPos = (uint32_t)(encoder_GetPos16() + encoder_GetNTurn16());
-	return NPos;
-}
+	encoder_UpdatePosition(); //fetch the position
 
-int16_t encoder_GetSpeed(void)
-{
-	static int AngPos[2] = {0,0};
-	static int16_t Speed = 0;
-	int Speed_rpm;
+	delta_pos = (float)angle_position[0] - (float)angle_position[1];
 
-	encoder_updatePosition(AngPos);
-	//Speed mais n'est pas mathématiquement une vitesse, utilisation en prétraitement
-	Speed = AngPos[0]- AngPos[1];
-	if (Speed >= 0)
+	/* TIMER RESET ALGORYTHM */
+	if (delta_pos >= 0.0f)
 	{
-		if (Speed >= HALF_MAX_COUNT)
-		{
-			Speed = Speed - MAX_COUNT;
-		}
+	    if (delta_pos >= (float)HALF_MAX_COUNT)
+	    {
+	        delta_pos = delta_pos - (float)MAX_COUNT;
+	    }
 	}
 	else
 	{
-		if (Speed <= HALF_MAX_COUNT)
-		{
-			Speed = Speed + MAX_COUNT;
-		}
+	    if (delta_pos < -(float)HALF_MAX_COUNT)
+	    {
+	    	delta_pos = delta_pos + (float)MAX_COUNT;
+	    }
 	}
+	/* SPEED TREATMENT */
+	// 1 tour = 2000
+	// Nbre de Tours pendant Te: DELTA_pos/2000
+	// Nbre de Tours pendant 1s (Te en ms) : (DELTA_pos/2000)*(1000/Te)
+	// Nbre de Tours par minute : : (DELTA_pos/2000)*((60*1000)/Te)
 
-	// Conversion en RPM
-	// 1 Tour = 32767
-	// Nbre tours pendant Te : DELTA DE POS/32767
-	// Nbre tours pendant 1s (soit 1/Te fois) : (DELTA DE POS/32767)*(1000/Te)
-	// Nbre de tours min : La meme chose x60
+	speed = (delta_pos/2000)*(60*1000/TE_ms); //SPEED EN TR/MIN
+	output_speed = speed;
 
-	Speed_rpm = (Speed*60*1000)*(32767*TE_ms);
-
-	return Speed_rpm;
+	//speed = speed*60/15.88;
+	//speed = speed * (M_PI/60.0f);
 
 }
 
 
 void encoder_CallbackIndex()
 {
-	if (__HAL_TIM_DIRECTION_STATUS(&TimEncoderHandle)==1)
+	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
 	{
-		index--;
+		Nindex--;
+		//pos_count -= encoder_FetchPosition();
+		__HAL_TIM_SetCounter(&htim1, MAX_CNT_PER_REV);
 	}
 	else
 	{
-		index++;
+		Nindex++;
+		//pos_count += encoder_FetchPosition();
+		__HAL_TIM_SetCounter(&htim1, 0);
 	}
-	__HAL_TIM_SetCounter(&TimEncoderHandle, 0);
-	HAL_TIM_Encoder_Start(&TimEncoderHandle, TIM_CHANNEL_1);
-	HAL_TIM_Encoder_Start(&TimEncoderHandle, TIM_CHANNEL_2);
+	/* ENCODER RESTART */
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
 
 }
 
+//====================================================================
+//			EXTI PIN 7
+//====================================================================
 
-//(uint32_t)(float*1000) // 3340.91 = 3340
-		// nombre 0xF000, 0x0f00,
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+  if(GPIO_Pin == GPIO_PIN_7) {
+	  encoder_CallbackIndex();
+  }
+}
+
 
 
 
