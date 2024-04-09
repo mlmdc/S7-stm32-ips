@@ -11,7 +11,7 @@
 
 #include "main.h"
 
-void dataPreparation(uint8_t * source, uint8_t * destination);
+void comm_SendData(void);
 
 
 #endif /* INC_COMM_H_ */

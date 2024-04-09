@@ -262,7 +262,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		ms_value = 0;
 		adc_GetValue();
-		printf("ADC VALUE %f \n\r", ADC_LastValue);
+		//printf("ADC VALUE %f \n\r", ADC_LastValue);
+		comm_SendData();
 	}
 }
 

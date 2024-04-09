@@ -55,19 +55,20 @@ extern void dyn_rcv_cb(uint8_t car);
 
 
 
-void dataPreparation(uint8_t * source, uint8_t * destination)
+void comm_SendData(void)
 {
 	//DATA_FORMAT : tx_data[x] = [ID_TX_TypeOfData]+[TypeOfData_0]+...+[TypeOfData_n]+[ID_TX_TypeOfData...]+...
 
+	//printf("\n\r");
 	/* ADC */
-	printf("%x", ID_TX_ADC); //hex id
-	printf("%f", ADC_LastValue);
+	printf("0x%x, ", ID_TX_ADC); //hex id
+	printf("%f; ", ADC_LastValue);
 	/* PWM */
-	printf("%x", ID_TX_PWM); //hex id
-	printf("%u", (unsigned int)PWM_Value); //uchar typecast for warning
+	printf("0x%x, ", ID_TX_PWM); //hex id
+	printf("%u; ", (unsigned int)PWM_Value); //uchar typecast for warning
 	/* PWM */
-	printf("%x", ID_TX_RPM); //hex id
-	printf("%f", output_speed);
+	printf("0x%x, ", ID_TX_RPM); //hex id
+	printf("%f; ", output_speed);
 
 	printf("\n\r");
 }
