@@ -57,7 +57,6 @@
 /* USER CODE BEGIN PV */
 
 volatile uint32_t ms_value = 0;
-unsigned char rx_data[8];
 
 uint32_t test;
 
@@ -121,10 +120,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start(&htim1);
   printf("\n\r=== NEW SESSION ===\n\r");
+
   //INIT PERSOS
   pwm_Init();
-  pwm_SetDuty(10.0f);
+  //pwm_SetVoltage(5.0f);
   printf("PWM INIT PASSED\n\r");
+
 
   /* ENCODER SPEED Init */
   encoder_Init();
@@ -135,23 +136,23 @@ int main(void)
   mcc_setCW();
   printf("CW INIT PASSED\n\r");
 
-
-  /* DMA ADC INIT*/
-  current_Init();
-  printf("ADC COMPUTE INIT PASSED\n\r");
-
-
   /* PID Init */
   pidFilter_param_init();
   printf("PID INIT PASSED\n\r");
+  pidFilter_setCommand(1500.0f);
+
+  /* DMA ADC INIT*/
+   current_Init();
+   printf("ADC COMPUTE INIT PASSED\n\r");
 
   /* USART RECEPTION */
-  HAL_USART_Receive_IT(&husart2, rx_data, 8);
+  comm_init();
 
-  //TIM2 Global interruptions
+  /* TIM2 Global interruptions */
   tickTimer_Init(10); // period in ms
   printf("tickTimer2 INIT PASSED\n\r");
 
+  /* Initial tickTime */
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -238,57 +239,37 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 * 4. Envoi des données
 	 */
 
-	/*
-	encoder_GetSpeed();
-	adc_GetValue();
-	printf("MOTOR SPEED %f \n\r", output_speed);
-	*/
+
+	//encoder_GetSpeed();
+	//adc_GetValue();
+	//printf("MOTOR SPEED %f \n\r", output_speed);
+	//printf("PWM_Value %i \n\r", (int)PWM_Value);
+
 	//====================================================================
 	//			PID Filter
 	//====================================================================
 	// Constante de temps mécanique tm : 13ms
 	// Stabilisation du moteur après sa commande : 5*tm
-	if (((ms_value % 7) >= 0) &&  ((ms_value % 7 ) <= 1))
+	if ((ms_value % 7) == 0)
 	{
 		encoder_GetSpeed();
-		//printf("MOTOR SPEED %f \n\r", output_speed);
+		printf("MOTOR SPEED %f \n\r", output_speed);
 		pidFilter_compute();
 	}
 
 	//====================================================================
 	//			ms_count reset
 	//====================================================================
-	if (ms_value >= 100)
+	if ((ms_value % 100) == 0)
 	{
-		ms_value = 0;
-		adc_GetValue();
+		//ms_value = 0;
+		//adc_GetValue();
 		//printf("ADC VALUE %f \n\r", ADC_LastValue);
-		comm_SendData();
+		//comm_SendData();
+		//printf("HAL_GetTick = %i\n\r", (int)HAL_GetTick());
 	}
 }
 
-//====================================================================
-//			RECEPTION CALLBACK PERIOD
-//====================================================================
-
-void HAL_USART_RxCpltCallback(USART_HandleTypeDef *husart)
-{
-	/*
-	 * Protocole à la réception :
-	 *
-	 * 1. Traitement des données reçues
-	 *
-	 * 2. Réarmement de la réception en interruption des données
-	 *
-	 */
-
-	//Traitement données
-
-
-	//Réarmement réception
-	//HAL_StatusTypeDef HAL_USART_Receive_IT(USART_HandleTypeDef *husart, uint8_t *pRxData, uint16_t Size)
-	HAL_USART_Receive_IT(&husart2, rx_data, 8);
-}
 
 /* USER CODE END 4 */
 

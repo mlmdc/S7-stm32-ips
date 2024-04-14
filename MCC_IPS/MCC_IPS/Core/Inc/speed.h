@@ -13,6 +13,7 @@
 //TIM_HandleTypeDef TimEncoderHandle;
 
 extern volatile float output_speed;
+extern volatile int32_t Nindex;
 
 void encoder_Init(void);
 

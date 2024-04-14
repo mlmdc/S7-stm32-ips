@@ -9,6 +9,7 @@
 #include "main.h"
 #include "speed.h"
 #include "pwmCommand.h"
+#include <math.h>
 
 
 //====================================================================
@@ -37,13 +38,13 @@ float a1;
 void pidFilter_param_init(void)
 {
 	/* PID values */
-	Kp = 0.010192818186143232f;
-	Ki = 0.0020385636372286463f;
-	Kd = -0.0030578454558429697;
-	te_ms = 100;
+	Kp = 0.01f;
+	Ki = 0.0006666666666666666f;
+	Kd = 0.09;
+	te_ms = 70;
 	Ti = (Kp/Ki)*(float)te_ms;
 	Td = (Kd/Kp)*(float)te_ms;
-	command = 500.0f;
+	command = 0.0f;
 
 	/* PID coefficients init */
 
@@ -69,12 +70,24 @@ void pidFilter_setKd(float new_Kd)
 	Kd = new_Kd;
 }
 
+void pidFilter_setCommand(float new_command)
+{
+	command = new_command;
+}
+
+void pidFilter_setCommandVoltage(float new_voltage)
+{
+	float new_command = 3000*(new_voltage/24);
+	pidFilter_setCommand(new_command);
+}
+
+
 void pidFilter_compute(void)
 {
 	/* set k-1 */
 	Oe_k[2] = Oe_k[1];
 	Oe_k[1] = Oe_k[0];
-	Oe_k[0] = command - output_speed;
+	Oe_k[0] = command - (float)fabs(output_speed);
 
 	Uc_k[1] = Uc_k[0];
 
@@ -82,9 +95,13 @@ void pidFilter_compute(void)
 	Uc_k[0] = (b2/a2)*Oe_k[0] + (b1/a2)*Oe_k[1] + (b0/a2)*Oe_k[2] - (a1/a2)*Uc_k[1];
 
 	/* no negative voltage */
-	if (Uc_k[0] <= 0.0f)
+	if (Uc_k[0] < 0.0f)
 	{
 		Uc_k[0] = 0.0f;
+	}
+	else if (Uc_k[0] > 24.0f) /* no voltage superior to 24, both as a command & status*/
+	{
+		Uc_k[0] = 24.0f;
 	}
 	/* PWM new duty */
 	//pwm_SetVoltage(Uc_k[0]);

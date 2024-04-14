@@ -1,6 +1,6 @@
 ../Core/Src/speed.c:33:6:encoder_Init	8	static
 ../Core/Src/speed.c:48:10:encoder_FetchPosition	16	static
 ../Core/Src/speed.c:54:6:encoder_UpdatePosition	16	static
-../Core/Src/speed.c:60:6:encoder_GetSpeed	16	static
-../Core/Src/speed.c:98:6:encoder_CallbackIndex	8	static
-../Core/Src/speed.c:122:6:HAL_GPIO_EXTI_Callback	16	static
+../Core/Src/speed.c:67:6:encoder_GetSpeed	16	static
+../Core/Src/speed.c:124:6:encoder_CallbackIndex	8	static
+../Core/Src/speed.c:149:6:HAL_GPIO_EXTI_Callback	16	static

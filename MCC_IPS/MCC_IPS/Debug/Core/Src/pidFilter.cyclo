@@ -1,5 +1,7 @@
-pidFilter.c:37:6:pidFilter_param_init	1
-pidFilter.c:57:6:pidFilter_setKp	1
-pidFilter.c:62:6:pidFilter_setKi	1
-pidFilter.c:67:6:pidFilter_setKd	1
-pidFilter.c:72:6:pidFilter_compute	2
+pidFilter.c:38:6:pidFilter_param_init	1
+pidFilter.c:58:6:pidFilter_setKp	1
+pidFilter.c:63:6:pidFilter_setKi	1
+pidFilter.c:68:6:pidFilter_setKd	1
+pidFilter.c:73:6:pidFilter_setCommand	1
+pidFilter.c:78:6:pidFilter_setCommandVoltage	1
+pidFilter.c:85:6:pidFilter_compute	3

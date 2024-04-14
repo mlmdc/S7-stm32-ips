@@ -1,6 +1,5 @@
-main.c:75:1:__io_putchar	1
-main.c:91:5:main	1
-main.c:173:6:SystemClock_Config	3
-main.c:221:6:HAL_TIM_PeriodElapsedCallback	3
-main.c:274:6:HAL_USART_RxCpltCallback	1
-main.c:299:6:Error_Handler	1
+main.c:74:1:__io_putchar	1
+main.c:90:5:main	1
+main.c:174:6:SystemClock_Config	3
+main.c:222:6:HAL_TIM_PeriodElapsedCallback	2
+main.c:280:6:Error_Handler	1

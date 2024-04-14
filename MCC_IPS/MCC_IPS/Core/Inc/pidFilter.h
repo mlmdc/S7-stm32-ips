@@ -29,6 +29,10 @@ void pidFilter_setKi(float new_Ki);
 
 void pidFilter_setKd(float new_Kd);
 
+void pidFilter_setCommand(float new_command);
+
+void pidFilter_setCommandVoltage(float new_voltage);
+
 void pidFilter_compute(void);
 
 #endif /* INC_PIDFILTER_H_ */

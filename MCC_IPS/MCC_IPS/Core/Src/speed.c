@@ -19,15 +19,15 @@ volatile float output_speed;
 
 #define N_MEASURES 8
 #define M_PI (float)3.141592653589793
-#define TE_ms 100 //
+#define TE_ms 10 //
 #define COUNT_PER_ROUND 500
 #define MAX_CNT_PER_REV ((COUNT_PER_ROUND)*4 - 1)
 #define MAX_COUNT 2000
 #define HALF_MAX_COUNT (MAX_COUNT>>1)
 
-int32_t Nindex;
+volatile int32_t Nindex;
 int32_t pos_count;
-uint32_t angle_position[2];
+int32_t angle_position[2];
 float speed;
 
 void encoder_Init(void)
@@ -54,18 +54,43 @@ uint16_t encoder_FetchPosition()
 void encoder_UpdatePosition()
 {
 	angle_position[1] = angle_position[0];
-	angle_position[0] = Nindex*4*COUNT_PER_ROUND +(uint32_t)encoder_FetchPosition();
+	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
+	{
+		angle_position[0] = Nindex*4*COUNT_PER_ROUND -(int32_t)encoder_FetchPosition();
+	}
+	else
+	{
+		angle_position[0] = Nindex*4*COUNT_PER_ROUND +(int32_t)encoder_FetchPosition();
+	}
 }
 
 void encoder_GetSpeed()
 {
 	float delta_pos = 0; //init
 
+	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
+		{
+			//Nindex--;
+			// TEST
+			pos_count -= (4000-encoder_FetchPosition());
+		}
+	else
+		{
+			//Nindex++;
+			// TEST
+			pos_count += encoder_FetchPosition();
+		}
+		__HAL_TIM_SetCounter(&htim1, 0);
+		/* ENCODER RESTART */
+		HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+		HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
+
 	encoder_UpdatePosition(); //fetch the position
 
 	delta_pos = (float)angle_position[0] - (float)angle_position[1];
 
 	/* TIMER RESET ALGORYTHM */
+	/*
 	if (delta_pos >= 0.0f)
 	{
 	    if (delta_pos >= (float)HALF_MAX_COUNT)
@@ -75,19 +100,20 @@ void encoder_GetSpeed()
 	}
 	else
 	{
-	    if (delta_pos < -(float)HALF_MAX_COUNT)
+	    if (delta_pos < (-1)*(float)HALF_MAX_COUNT)
 	    {
 	    	delta_pos = delta_pos + (float)MAX_COUNT;
 	    }
 	}
+	*/
 	/* SPEED TREATMENT */
 	// 1 tour = 2000
 	// Nbre de Tours pendant Te: DELTA_pos/2000
 	// Nbre de Tours pendant 1s (Te en ms) : (DELTA_pos/2000)*(1000/Te)
 	// Nbre de Tours par minute : : (DELTA_pos/2000)*((60*1000)/Te)
 
-	speed = (delta_pos/2000)*(60*1000/TE_ms); //SPEED EN TR/MIN
-	output_speed = speed;
+	speed = (1000*delta_pos/2000)/((float)TE_ms); //SPEED EN TR/MIN
+	output_speed = 60*speed*0.3864f*0.363f;
 
 	//speed = speed*60/15.88;
 	//speed = speed * (M_PI/60.0f);
@@ -100,15 +126,16 @@ void encoder_CallbackIndex()
 	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
 	{
 		Nindex--;
-		//pos_count -= encoder_FetchPosition();
-		__HAL_TIM_SetCounter(&htim1, MAX_CNT_PER_REV);
+		// TEST
+		pos_count -= (4000-encoder_FetchPosition());
 	}
 	else
 	{
 		Nindex++;
-		//pos_count += encoder_FetchPosition();
-		__HAL_TIM_SetCounter(&htim1, 0);
+		// TEST
+		pos_count += encoder_FetchPosition();
 	}
+	__HAL_TIM_SetCounter(&htim1, 0);
 	/* ENCODER RESTART */
 	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
 	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
@@ -121,7 +148,7 @@ void encoder_CallbackIndex()
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if(GPIO_Pin == GPIO_PIN_7) {
+  if(GPIO_Pin == GPIO_PIN_6) {
 	  encoder_CallbackIndex();
   }
 }
