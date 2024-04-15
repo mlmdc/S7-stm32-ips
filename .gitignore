@@ -12,3 +12,5 @@ test.log
 /MCC_IPS/MCC_IPS/.settings/
 
 /MCC_IPS/.metadata/*
+
+/.ipynb_checkpoints/*

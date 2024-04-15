@@ -12,7 +12,11 @@
 #include "current.h"
 #include "usart.h"
 #include "pwmCommand.h"
+#include "pidFilter.h"
+#include "mccCommand.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 //====================================================================
 //			SIZE
@@ -24,29 +28,31 @@
 #define UINT32_CHAR_SIZE 16
 #define UINT16_CHAR_SIZE 8
 
-#define RX_BUFFER_SIZE 	(int)32
+#define RX_BUFFER_SIZE 	(int)16
 
 //====================================================================
 //			RX IDENTIFIERS TABLE
 //====================================================================
 //ALL UNSIGNED CHAR
-#define ID_RX_START			(unsigned char)0x01
-#define ID_RX_STOP			(unsigned char)0x02
-#define ID_RX_PWM_START		(unsigned char)0x03
-#define ID_RX_PWM_STOP		(unsigned char)0x04
-#define ID_RX_DUTY_SET		(unsigned char)0x05
-#define ID_RX_DIR			(unsigned char)0x06
-#define ID_RX_VOLTAGE_SET  	(unsigned char)0x07
+#define ID_RX_START			"0x01"
+#define ID_RX_STOP			"0x02"
+#define ID_RX_PWM_START		"0x03"
+#define ID_RX_PWM_STOP		"0x04"
+#define ID_RX_DUTY_SET		"0x05"
+#define ID_RX_DIR			"0x06"
+#define ID_RX_VOLTAGE_SET  	"0x07"
 
-#define ID_RX_SEND_KP		(unsigned char)0x08
-#define ID_RX_SET_KP		(unsigned char)0x09
+/*
+#define ID_RX_SEND_KP		0x08
+#define ID_RX_SET_KP		0x09
+*/
 
-#define ID_RX_SEND_KP		(unsigned char)0x0A
-#define ID_RX_SET_KP		(unsigned char)0x0B
-#define ID_RX_SEND_KI		(unsigned char)0x0C
-#define ID_RX_SET_KI		(unsigned char)0x0D
-#define ID_RX_SEND_KD		(unsigned char)0x0E
-#define ID_RX_SET_KD		(unsigned char)0x0F
+#define ID_RX_SEND_KP		"0x0A"
+#define ID_RX_SET_KP		"0x0B"
+#define ID_RX_SEND_KI		"0x0C"
+#define ID_RX_SET_KI		"0x0D"
+#define ID_RX_SEND_KD		"0x0E"
+#define ID_RX_SET_KD		"0x0F"
 
 //====================================================================
 //			TX IDENTIFIERS TABLE
@@ -60,9 +66,11 @@
 #define ID_TX_DIR			(unsigned int)0x13
 
 
-extern void dyn_rcv_cb(uint8_t car);
+//extern void dyn_rcv_cb(uint8_t car);
 
 unsigned char rx_data[RX_BUFFER_SIZE];
+char ident_data[4];
+char value_data[RX_BUFFER_SIZE-4];
 
 void comm_init(void)
 {
@@ -70,6 +78,19 @@ void comm_init(void)
 	HAL_USART_Receive_IT(&husart2, rx_data, RX_BUFFER_SIZE);
 }
 
+
+//====================================================================
+//			utils
+//====================================================================
+
+void slice_str(const char * str, char * buffer, size_t start, size_t end)
+{
+    size_t j = 0;
+    for ( size_t i = start; i <= end; ++i ) {
+        buffer[j++] = str[i];
+    }
+    buffer[j] = 0;
+}
 
 //====================================================================
 //			USART TX
@@ -101,6 +122,99 @@ void comm_SendData(void)
 //			USART RX
 //====================================================================
 
+void comm_sliceInput(const char * input, char * identifier, char *value)
+{
+	char tmp_value[RX_BUFFER_SIZE-4];
+	char *tmp_slice;
+	/* Slice input string from 0 to 3 == the identifier of shape 0xXX */
+	slice_str(input, identifier, 0, 3);
+
+	/* Slice input string from 5 to buffer size -1 == the value*/
+	slice_str(input, tmp_value, 4, RX_BUFFER_SIZE); // rest of the string
+
+	/* cast from char*[RX_BUFFER_SIZE-4], incompatible with strsep, to char * */
+	tmp_slice = (char *)tmp_value;
+	/* SEParate the string with ; as delimiter, keeps the string before ; */
+	value = strsep(&tmp_slice, ";");
+}
+
+void comm_computeInput(char * identifier, char * value)
+{
+	/*
+	 * str 1 == str 2 compare the address
+	 * strcmp(str1,str2) compare the content
+	 */
+
+	if (strcmp(identifier,ID_RX_START) == 0)
+	{
+		//break; //temp
+	}
+	else if (strcmp(identifier,ID_RX_STOP) == 0)
+	{
+		//break; //temp
+	}
+	else if (strcmp(identifier,ID_RX_PWM_START) == 0)
+	{
+		pwm_Enable();
+	}
+	else if (strcmp(identifier,ID_RX_PWM_STOP) == 0)
+	{
+		pwm_Disable();
+	}
+	else if (strcmp(identifier,ID_RX_DUTY_SET) == 0)
+	{
+		/* Data sanitization done in SetVoltage */
+		pwm_SetDuty((float)atof(value));
+	}
+	else if (strcmp(identifier,ID_RX_DIR) == 0)
+	{
+		int tmp_dir = atoi(value);
+		/* data sanitization */
+		if (tmp_dir < 0)
+		{
+			tmp_dir = 0;
+		}
+		else if (tmp_dir > 1)
+		{
+			tmp_dir = 1;
+		}
+		/* Change of direction */
+		if (tmp_dir == 0)
+		{
+				mcc_setCCW();
+		}
+		else
+		{
+				mcc_setCW();
+		}
+	}
+	else if (strcmp(identifier,ID_RX_VOLTAGE_SET) == 0)
+	{
+		/* Data sanitization done in SetVoltage */
+		pwm_SetVoltage((float)atof(value));
+	}
+	else if (strcmp(identifier,ID_RX_SET_KP) == 0)
+	{
+		/* No data sanitization */
+		Kp = (float)atof(value);
+	}
+	else if (strcmp(identifier,ID_RX_SET_KI) == 0)
+	{
+		/* No data sanitization */
+		Ki = (float)atof(value);
+	}
+	else if (strcmp(identifier,ID_RX_SET_KD) == 0)
+	{
+		/* No data sanitization */
+		Kd = (float)atof(value);
+	}
+	else
+	{
+		//break;
+	}
+}
+
+
 void HAL_USART_RxCpltCallback(USART_HandleTypeDef *husart)
 {
 	/*
@@ -112,10 +226,17 @@ void HAL_USART_RxCpltCallback(USART_HandleTypeDef *husart)
 	 *
 	 */
 
-	//Traitement données
+	/* Decoupage données */
+	comm_sliceInput((char *)rx_data, ident_data, value_data);
 
+	/* Traitement données */
+	comm_computeInput(ident_data, value_data);
 
-	//Réarmement réception
+	debugled_toggle();
+	printf("RECEIVED MESSAGE");
+
+	/* Réarmement réception */
 	//HAL_StatusTypeDef HAL_USART_Receive_IT(USART_HandleTypeDef *husart, uint8_t *pRxData, uint16_t Size)
 	HAL_USART_Receive_IT(&husart2, rx_data, RX_BUFFER_SIZE);
 }
+

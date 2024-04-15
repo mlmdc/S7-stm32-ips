@@ -3,5 +3,5 @@
 ../Core/Src/pwmCommand.c:53:6:pwm_SetDuty	16	static
 ../Core/Src/pwmCommand.c:63:6:pwm_SetVoltage	24	static
 ../Core/Src/pwmCommand.c:86:6:pwm_Enable	8	static
-../Core/Src/pwmCommand.c:91:6:pwm_Disable	8	static
-../Core/Src/pwmCommand.c:96:6:pwm_Toggle	8	static
+../Core/Src/pwmCommand.c:92:6:pwm_Disable	8	static
+../Core/Src/pwmCommand.c:98:6:pwm_Toggle	8	static

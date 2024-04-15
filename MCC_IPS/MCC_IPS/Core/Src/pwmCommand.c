@@ -86,11 +86,13 @@ void pwm_SetVoltage(float voltage)
 void pwm_Enable(void)
 {
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
+	PWM_Toggle = 1;
 }
 
 void pwm_Disable(void)
 {
 	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
+	PWM_Toggle = 0;
 }
 
 void pwm_Toggle(void)

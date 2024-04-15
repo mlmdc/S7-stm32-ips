@@ -1,4 +1,7 @@
-mccCommand.c:23:6:mcc_setCW	1
-mccCommand.c:28:6:mcc_setCCW	1
-mccCommand.c:33:6:mcc_setBraking	1
-mccCommand.c:38:6:mcc_toggleDir	2
+mccCommand.c:22:6:debugled_setOn	1
+mccCommand.c:27:6:debugled_setOff	1
+mccCommand.c:32:6:debugled_toggle	2
+mccCommand.c:46:6:mcc_setCW	1
+mccCommand.c:52:6:mcc_setCCW	1
+mccCommand.c:58:6:mcc_setBraking	1
+mccCommand.c:63:6:mcc_toggleDir	2

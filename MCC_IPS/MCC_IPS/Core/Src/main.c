@@ -253,7 +253,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if ((ms_value % 7) == 0)
 	{
 		encoder_GetSpeed();
-		printf("MOTOR SPEED %f \n\r", output_speed);
+		//printf("MOTOR SPEED %f \n\r", output_speed);
 		pidFilter_compute();
 	}
 
@@ -269,7 +269,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		//printf("HAL_GetTick = %i\n\r", (int)HAL_GetTick());
 	}
 }
-
 
 /* USER CODE END 4 */
 

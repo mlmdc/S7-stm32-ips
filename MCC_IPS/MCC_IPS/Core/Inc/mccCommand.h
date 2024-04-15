@@ -11,6 +11,12 @@
 
 #include "main.h"
 
+void debugled_setOn(void);
+
+void debugled_setOff(void);
+
+void debugled_toggle(void);
+
 void mcc_setCW(void);
 
 void mcc_setCCW(void);

@@ -11,6 +11,7 @@
 // PC8 : BRAKE
 // PC9 :
 static int isCW = 0;
+static int isLedOn = 0;
 
 /*
  * CW : DIR = 1
@@ -18,16 +19,40 @@ static int isCW = 0;
  * CCW : DIR = 0
  *
  */
+void debugled_setOn(void)
+{
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 1);
+}
 
+void debugled_setOff(void)
+{
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, 0);
+}
+
+void debugled_toggle(void)
+{
+	if (isCW == 0)
+	{
+			debugled_setOn();
+			isLedOn = 1;
+	}
+	else
+	{
+			debugled_setOff();
+			isLedOn = 0;
+	}
+}
 
 void mcc_setCW(void)
 {
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 1);
+	isCW = 1;
 }
 
 void mcc_setCCW(void)
 {
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, 0);
+	isCW = 0;
 }
 
 void mcc_setBraking(int state)

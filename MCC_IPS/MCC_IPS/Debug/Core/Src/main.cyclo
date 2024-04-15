@@ -2,4 +2,4 @@ main.c:74:1:__io_putchar	1
 main.c:90:5:main	1
 main.c:174:6:SystemClock_Config	3
 main.c:222:6:HAL_TIM_PeriodElapsedCallback	2
-main.c:280:6:Error_Handler	1
+main.c:279:6:Error_Handler	1
