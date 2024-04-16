@@ -123,7 +123,7 @@ int main(void)
 
   //INIT PERSOS
   pwm_Init();
-  //pwm_SetVoltage(5.0f);
+  pwm_SetVoltage(0.0f);
   printf("PWM INIT PASSED\n\r");
 
 
@@ -139,7 +139,7 @@ int main(void)
   /* PID Init */
   pidFilter_param_init();
   printf("PID INIT PASSED\n\r");
-  pidFilter_setCommand(1500.0f);
+  pidFilter_setCommand(100.0f);
 
   /* DMA ADC INIT*/
    current_Init();
@@ -240,8 +240,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 */
 
 
-	//encoder_GetSpeed();
-	//adc_GetValue();
+	encoder_GetSpeed();
+	adc_GetValue();
+	printf("ADC VALUE %f \n\r", ADC_LastValue);
 	//printf("MOTOR SPEED %f \n\r", output_speed);
 	//printf("PWM_Value %i \n\r", (int)PWM_Value);
 
@@ -250,9 +251,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	//====================================================================
 	// Constante de temps mécanique tm : 13ms
 	// Stabilisation du moteur après sa commande : 5*tm
-	if ((ms_value % 7) == 0)
+	if ((ms_value % 20) == 0)
 	{
-		encoder_GetSpeed();
+		//encoder_GetSpeed();
 		//printf("MOTOR SPEED %f \n\r", output_speed);
 		pidFilter_compute();
 	}
@@ -264,7 +265,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		//ms_value = 0;
 		//adc_GetValue();
-		//printf("ADC VALUE %f \n\r", ADC_LastValue);
+
 		//comm_SendData();
 		//printf("HAL_GetTick = %i\n\r", (int)HAL_GetTick());
 	}

@@ -21,6 +21,8 @@ extern volatile float Oe_k[3];
 extern volatile float Uc_k[2];
 extern volatile float command;
 
+extern volatile float debug_tension;
+
 void pidFilter_param_init(void);
 
 void pidFilter_setKp(float new_Kp);

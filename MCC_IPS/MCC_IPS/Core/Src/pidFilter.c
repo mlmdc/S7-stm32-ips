@@ -24,6 +24,8 @@ volatile float Oe_k[3] = {0,0,0};
 volatile float Uc_k[2] = {0,0};
 volatile float command;
 
+volatile float debug_tension;
+
 float Ti = 0;
 float Td = 0;
 float k_alpha = 0;
@@ -38,13 +40,14 @@ float a1;
 void pidFilter_param_init(void)
 {
 	/* PID values */
-	Kp = 0.01f;
-	Ki = 0.0006666666666666666f;
-	Kd = 0.09;
+	Kp = 0.004f;
+	Ki = 0.008f;
+	Kd = -0.0001;
 	te_ms = 70;
 	Ti = (Kp/Ki)*(float)te_ms;
 	Td = (Kd/Kp)*(float)te_ms;
 	command = 0.0f;
+	debug_tension = 0.0f;
 
 	/* PID coefficients init */
 
@@ -104,5 +107,7 @@ void pidFilter_compute(void)
 		Uc_k[0] = 24.0f;
 	}
 	/* PWM new duty */
-	//pwm_SetVoltage(Uc_k[0]);
+	pwm_SetVoltage(Uc_k[0]);
+
+	debug_tension = Uc_k[0];
 }

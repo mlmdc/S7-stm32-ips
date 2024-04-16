@@ -2,3 +2,6 @@ Nindex
 output_speed
 speed
 delta_pos
+pos_count
+debug_tension
+command

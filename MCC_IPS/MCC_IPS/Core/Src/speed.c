@@ -54,14 +54,7 @@ uint16_t encoder_FetchPosition()
 void encoder_UpdatePosition()
 {
 	angle_position[1] = angle_position[0];
-	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
-	{
-		angle_position[0] = Nindex*4*COUNT_PER_ROUND -(int32_t)encoder_FetchPosition();
-	}
-	else
-	{
-		angle_position[0] = Nindex*4*COUNT_PER_ROUND +(int32_t)encoder_FetchPosition();
-	}
+	angle_position[0] = pos_count;
 }
 
 void encoder_GetSpeed()
@@ -113,11 +106,7 @@ void encoder_GetSpeed()
 	// Nbre de Tours par minute : : (DELTA_pos/2000)*((60*1000)/Te)
 
 	speed = (1000*delta_pos/2000)/((float)TE_ms); //SPEED EN TR/MIN
-	output_speed = 60*speed*0.3864f*0.363f;
-
-	//speed = speed*60/15.88;
-	//speed = speed * (M_PI/60.0f);
-
+	output_speed = 60.0f*(19.0f/129.0f)*speed;
 }
 
 
@@ -148,7 +137,7 @@ void encoder_CallbackIndex()
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-  if(GPIO_Pin == GPIO_PIN_6) {
+  if(GPIO_Pin == GPIO_PIN_7) {
 	  encoder_CallbackIndex();
   }
 }
