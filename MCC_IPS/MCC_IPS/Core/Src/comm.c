@@ -2,7 +2,7 @@
  * comm.c
  *
  *  Created on: Mar 24, 2024
- *      Author: amay
+ *      Author: madec
  */
 
 
@@ -72,7 +72,7 @@ unsigned char rx_data[RX_BUFFER_SIZE];
 char ident_data[4];
 char value_data[RX_BUFFER_SIZE-4];
 
-void comm_init(void)
+void comm_Init(void)
 {
 	/* USART RECEPTION */
 	HAL_USART_Receive_IT(&husart2, rx_data, RX_BUFFER_SIZE);
@@ -122,7 +122,7 @@ void comm_SendData(void)
 //			USART RX
 //====================================================================
 
-void comm_sliceInput(const char * input, char * identifier, char *value)
+void comm_SliceInput(const char * input, char * identifier, char *value)
 {
 	char tmp_value[RX_BUFFER_SIZE-4];
 	char *tmp_slice;
@@ -138,7 +138,7 @@ void comm_sliceInput(const char * input, char * identifier, char *value)
 	value = strsep(&tmp_slice, ";");
 }
 
-void comm_computeInput(char * identifier, char * value)
+void comm_ComputeInput(char * identifier, char * value)
 {
 	/*
 	 * str 1 == str 2 compare the address
@@ -181,11 +181,11 @@ void comm_computeInput(char * identifier, char * value)
 		/* Change of direction */
 		if (tmp_dir == 0)
 		{
-				mcc_setCCW();
+				mcc_SetCCW();
 		}
 		else
 		{
-				mcc_setCW();
+				mcc_SetCW();
 		}
 	}
 	else if (strcmp(identifier,ID_RX_VOLTAGE_SET) == 0)
@@ -196,17 +196,17 @@ void comm_computeInput(char * identifier, char * value)
 	else if (strcmp(identifier,ID_RX_SET_KP) == 0)
 	{
 		/* No data sanitization */
-		Kp = (float)atof(value);
+		pidFilter_SetKp((float)atof(value));
 	}
 	else if (strcmp(identifier,ID_RX_SET_KI) == 0)
 	{
 		/* No data sanitization */
-		Ki = (float)atof(value);
+		pidFilter_SetKi((float)atof(value));
 	}
 	else if (strcmp(identifier,ID_RX_SET_KD) == 0)
 	{
 		/* No data sanitization */
-		Kd = (float)atof(value);
+		pidFilter_SetKd((float)atof(value));
 	}
 	else
 	{
@@ -227,12 +227,12 @@ void HAL_USART_RxCpltCallback(USART_HandleTypeDef *husart)
 	 */
 
 	/* Decoupage données */
-	comm_sliceInput((char *)rx_data, ident_data, value_data);
+	comm_SliceInput((char *)rx_data, ident_data, value_data);
 
 	/* Traitement données */
-	comm_computeInput(ident_data, value_data);
+	comm_ComputeInput(ident_data, value_data);
 
-	debugled_toggle();
+	debugled_Toggle();
 	printf("RECEIVED MESSAGE");
 
 	/* Réarmement réception */

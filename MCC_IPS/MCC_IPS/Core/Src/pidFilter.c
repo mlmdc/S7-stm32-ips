@@ -2,7 +2,7 @@
  * filter.c
  *
  *  Created on: Apr 7, 2024
- *      Author: amay
+ *      Author: Madec
  */
 
 #include "pidFilter.h"
@@ -37,7 +37,7 @@ float a2;
 float a1;
 
 
-void pidFilter_param_init(void)
+void pidFilter_Init(void)
 {
 	/* PID values */
 	Kp = 0.004f;
@@ -58,34 +58,41 @@ void pidFilter_param_init(void)
 	a1 = -1;
 }
 
-void pidFilter_setKp(float new_Kp)
+void pidFilter_SetKp(float new_Kp)
 {
 	Kp = new_Kp;
 }
 
-void pidFilter_setKi(float new_Ki)
+void pidFilter_SetKi(float new_Ki)
 {
 	Ki = new_Ki;
 }
 
-void pidFilter_setKd(float new_Kd)
+void pidFilter_SetKd(float new_Kd)
 {
 	Kd = new_Kd;
 }
 
-void pidFilter_setCommand(float new_command)
+void pidFilter_SetCommand(float new_command)
 {
 	command = new_command;
 }
 
-void pidFilter_setCommandVoltage(float new_voltage)
+void pidFilter_SetCommandVoltage(float new_voltage)
 {
+	/* use rated speed of 3000 rpm */
 	float new_command = 3000*(new_voltage/24);
-	pidFilter_setCommand(new_command);
+	pidFilter_SetCommand(new_command);
+}
+
+void pidFilter_SetOuterSpeedCommand(float new_speed)
+{
+	/* 0 <= new_speed <= 3800/15.88 */
+	pidFilter_SetCommand(new_speed*15.88f);
 }
 
 
-void pidFilter_compute(void)
+void pidFilter_Compute(void)
 {
 	/* set k-1 */
 	Oe_k[2] = Oe_k[1];

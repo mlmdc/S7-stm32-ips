@@ -2,7 +2,7 @@
  * pwmCommand.h
  *
  *  Created on: Mar 20, 2024
- *      Author: madec
+ *      Author: Madec
  */
 
 #ifndef INC_PWMCOMMAND_H_

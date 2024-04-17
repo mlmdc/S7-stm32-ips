@@ -1,6 +1,6 @@
-comm.c:75:6:comm_init	1
+comm.c:75:6:comm_Init	1
 comm.c:86:6:slice_str	2
 comm.c:99:6:comm_SendData	1
-comm.c:125:6:comm_sliceInput	1
-comm.c:141:6:comm_computeInput	14
+comm.c:125:6:comm_SliceInput	1
+comm.c:141:6:comm_ComputeInput	14
 comm.c:218:6:HAL_USART_RxCpltCallback	1

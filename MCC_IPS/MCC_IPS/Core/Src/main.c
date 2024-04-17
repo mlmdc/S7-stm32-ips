@@ -133,20 +133,20 @@ int main(void)
 
 
   /* MCC Set Direction */
-  mcc_setCW();
+  mcc_SetCW();
   printf("CW INIT PASSED\n\r");
 
   /* PID Init */
-  pidFilter_param_init();
+  pidFilter_Init();
   printf("PID INIT PASSED\n\r");
-  pidFilter_setCommand(100.0f);
+  pidFilter_SetCommand(100.0f);
 
   /* DMA ADC INIT*/
    current_Init();
    printf("ADC COMPUTE INIT PASSED\n\r");
 
   /* USART RECEPTION */
-  comm_init();
+  comm_Init();
 
   /* TIM2 Global interruptions */
   tickTimer_Init(10); // period in ms
@@ -255,7 +255,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		//encoder_GetSpeed();
 		//printf("MOTOR SPEED %f \n\r", output_speed);
-		pidFilter_compute();
+		pidFilter_Compute();
 	}
 
 	//====================================================================

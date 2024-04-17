@@ -5,10 +5,6 @@
  *      Author: Madec
  */
 
-/*
- * A CORRIGER :
- * 	- Compte des valeurs trop élevé
- */
 
 #include "speed.h"
 #include "main.h"
@@ -106,7 +102,7 @@ void encoder_GetSpeed()
 	// Nbre de Tours par minute : : (DELTA_pos/2000)*((60*1000)/Te)
 
 	speed = (1000*delta_pos/2000)/((float)TE_ms); //SPEED EN TR/MIN
-	output_speed = 60.0f*(19.0f/129.0f)*speed;
+	output_speed = 60.0f*(19.0f/129.0f)*speed; //(19/129) = 3800/25800 == vitesse reelle a vide / vitesse constatée
 }
 
 

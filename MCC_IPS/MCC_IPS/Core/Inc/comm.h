@@ -2,7 +2,7 @@
  * comm.h
  *
  *  Created on: Mar 24, 2024
- *      Author: amay
+ *      Author: Madec
  */
 
 
@@ -11,13 +11,13 @@
 
 #include "main.h"
 
-void comm_init(void);
+void comm_Init(void);
 
 void comm_SendData(void);
 
-void comm_sliceInput(const char * input, char * identifier, char *value);
+void comm_SliceInput(const char * input, char * identifier, char *value);
 
-void comm_computeInput(char * identifier, char * value);
+void comm_ComputeInput(char * identifier, char * value);
 
 void HAL_USART_RxCpltCallback(USART_HandleTypeDef *husart);
 

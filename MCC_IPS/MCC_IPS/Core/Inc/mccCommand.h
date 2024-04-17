@@ -2,7 +2,7 @@
  * mccCommand.h
  *
  *  Created on: Mar 25, 2024
- *      Author: amay
+ *      Author: Madec
  */
 
 
@@ -11,18 +11,18 @@
 
 #include "main.h"
 
-void debugled_setOn(void);
+void debugled_SetOn(void);
 
-void debugled_setOff(void);
+void debugled_SetOff(void);
 
-void debugled_toggle(void);
+void debugled_Toggle(void);
 
-void mcc_setCW(void);
+void mcc_SetCW(void);
 
-void mcc_setCCW(void);
+void mcc_SetCCW(void);
 
-void mcc_setBraking(int state);
+void mcc_SetBraking(int state);
 
-void mcc_toggleDir(void);
+void mcc_ToggleDir(void);
 
 #endif /* INC_MCCCOMMAND_H_ */

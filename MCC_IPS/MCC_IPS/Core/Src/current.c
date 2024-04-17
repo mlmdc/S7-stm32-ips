@@ -2,7 +2,7 @@
  * current.c
  *
  *  Created on: Mar 20, 2024
- *      Author: amay
+ *      Author: Madec
  */
 
 #include "current.h"
