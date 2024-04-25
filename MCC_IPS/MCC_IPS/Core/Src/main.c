@@ -57,6 +57,9 @@
 /* USER CODE BEGIN PV */
 
 volatile uint32_t ms_value = 0;
+unsigned char rx_data[16];
+char ident_data[5];
+char value_data[13];
 
 uint32_t test;
 
@@ -73,7 +76,7 @@ void SystemClock_Config(void);
 
 PUTCHAR_PROTOTYPE
 {
-	HAL_USART_Transmit(&husart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY); //FOR DELAY
+	HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, HAL_MAX_DELAY); //FOR DELAY
 	return ch;
 }
 /* USER CODE END PFP */
@@ -112,7 +115,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_USART2_Init();
+  MX_USART2_UART_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
@@ -146,7 +149,7 @@ int main(void)
    printf("ADC COMPUTE INIT PASSED\n\r");
 
   /* USART RECEPTION */
-  comm_Init();
+  HAL_UART_Receive_IT(&huart2, rx_data, 16);
 
   /* TIM2 Global interruptions */
   tickTimer_Init(10); // period in ms
@@ -241,8 +244,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 
 	encoder_GetSpeed();
-	adc_GetValue();
-	printf("ADC VALUE %f \n\r", ADC_LastValue);
+	//adc_GetValue();
+	//printf("ADC VALUE %f \n\r", ADC_LastValue);
 	//printf("MOTOR SPEED %f \n\r", output_speed);
 	//printf("PWM_Value %i \n\r", (int)PWM_Value);
 
@@ -255,7 +258,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		//encoder_GetSpeed();
 		//printf("MOTOR SPEED %f \n\r", output_speed);
-		pidFilter_Compute();
+		//pidFilter_Compute();
+		//debug_readRx();
 	}
 
 	//====================================================================
@@ -264,11 +268,24 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if ((ms_value % 100) == 0)
 	{
 		//ms_value = 0;
-		//adc_GetValue();
+		adc_GetValue();
 
-		//comm_SendData();
+		comm_SendData();
 		//printf("HAL_GetTick = %i\n\r", (int)HAL_GetTick());
 	}
+}
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+	/* Decoupage données */
+	comm_SliceInput((char *)rx_data, ident_data, value_data);
+
+	/* Traitement données */
+	comm_ComputeInput(ident_data, value_data);
+
+	/* Réarmement réception */
+	HAL_UART_Receive_IT(&huart2, rx_data, 16);
 }
 
 /* USER CODE END 4 */

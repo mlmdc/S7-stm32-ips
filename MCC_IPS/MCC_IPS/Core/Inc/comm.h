@@ -13,13 +13,15 @@
 
 void comm_Init(void);
 
+void debug_readRx(void);
+
 void comm_SendData(void);
 
 void comm_SliceInput(const char * input, char * identifier, char *value);
 
 void comm_ComputeInput(char * identifier, char * value);
 
-void HAL_USART_RxCpltCallback(USART_HandleTypeDef *husart);
+void HAL_USART_RxCpltCallback(UART_HandleTypeDef *huart);
 
 
 #endif /* INC_COMM_H_ */

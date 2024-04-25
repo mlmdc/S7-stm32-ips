@@ -29,7 +29,7 @@ Core/Src/comm.o: ../Core/Src/comm.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
- ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_usart.h \
+ ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/comm.h ../Core/Inc/main.h ../Core/Inc/speed.h \
  ../Core/Inc/current.h ../Core/Inc/usart.h ../Core/Inc/pwmCommand.h \
  ../Core/Inc/pidFilter.h ../Core/Inc/mccCommand.h
@@ -64,7 +64,7 @@ Core/Src/comm.o: ../Core/Src/comm.c ../Core/Inc/main.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_pwr_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
-../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_usart.h:
+../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
 ../Core/Inc/comm.h:
 ../Core/Inc/main.h:
 ../Core/Inc/speed.h:

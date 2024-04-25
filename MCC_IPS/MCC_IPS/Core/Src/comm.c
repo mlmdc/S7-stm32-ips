@@ -47,6 +47,8 @@
 #define ID_RX_SET_KP		0x09
 */
 
+#define ID_RX_ACK			"0xFF"
+
 #define ID_RX_SEND_KP		"0x0A"
 #define ID_RX_SET_KP		"0x0B"
 #define ID_RX_SEND_KI		"0x0C"
@@ -59,25 +61,30 @@
 //====================================================================
 //ALL UNSIGNED CHAR
 //ID size = 4 chars
-#define ID_TX_TIME			(unsigned int)0x01
-#define ID_TX_ADC			(unsigned int)0x10
-#define ID_TX_PWM			(unsigned int)0x11
-#define ID_TX_RPM			(unsigned int)0x12
-#define ID_TX_DIR			(unsigned int)0x13
+#define ID_TX_TIME			"0x01"
+#define ID_TX_ADC			"0x10"
+#define ID_TX_PWM			"0x11"
+#define ID_TX_RPM			"0x12"
+#define ID_TX_DIR			"0x13"
+#define ID_TX_ACK			"0xFF"
 
 
 //extern void dyn_rcv_cb(uint8_t car);
-
+/*
 unsigned char rx_data[RX_BUFFER_SIZE];
 char ident_data[4];
 char value_data[RX_BUFFER_SIZE-4];
-
+*/
 void comm_Init(void)
 {
 	/* USART RECEPTION */
-	HAL_USART_Receive_IT(&husart2, rx_data, RX_BUFFER_SIZE);
+	//HAL_USART_Receive_IT(&husart2, rx_data, RX_BUFFER_SIZE);
 }
 
+void debug_readRx(void)
+{
+	//printf("RX_DATA %s \n\r", rx_data);
+}
 
 //====================================================================
 //			utils
@@ -102,16 +109,16 @@ void comm_SendData(void)
 
 	//printf("\n\r");
 	/* TIME */
-	printf("0x%x;", ID_TX_TIME); //hex id
+	printf("%s;", ID_TX_TIME); //hex id
 	printf("%i;", (int)HAL_GetTick());
 	/* ADC */
-	printf("0x%x;", ID_TX_ADC); //hex id
+	printf("%s;", ID_TX_ADC); //hex id
 	printf("%f;", ADC_LastValue);
 	/* PWM */
-	printf("0x%x;", ID_TX_PWM); //hex id
+	printf("%s;", ID_TX_PWM); //hex id
 	printf("%u;", (unsigned int)PWM_Value); //uchar typecast for warning
 	/* PWM */
-	printf("0x%x;", ID_TX_RPM); //hex id
+	printf("%s;", ID_TX_RPM); //hex id
 	printf("%f;", output_speed);
 
 	printf("\n\r");
@@ -126,16 +133,18 @@ void comm_SliceInput(const char * input, char * identifier, char *value)
 {
 	char tmp_value[RX_BUFFER_SIZE-4];
 	char *tmp_slice;
+	char *tmp_out_value;
 	/* Slice input string from 0 to 3 == the identifier of shape 0xXX */
 	slice_str(input, identifier, 0, 3);
 
 	/* Slice input string from 5 to buffer size -1 == the value*/
-	slice_str(input, tmp_value, 4, RX_BUFFER_SIZE); // rest of the string
+	slice_str(input, tmp_value, 4, RX_BUFFER_SIZE-1); // rest of the string
 
 	/* cast from char*[RX_BUFFER_SIZE-4], incompatible with strsep, to char * */
 	tmp_slice = (char *)tmp_value;
 	/* SEParate the string with ; as delimiter, keeps the string before ; */
-	value = strsep(&tmp_slice, ";");
+	tmp_out_value = strsep(&tmp_slice, ";");
+	strcpy(value,tmp_out_value);
 }
 
 void comm_ComputeInput(char * identifier, char * value)
@@ -147,11 +156,11 @@ void comm_ComputeInput(char * identifier, char * value)
 
 	if (strcmp(identifier,ID_RX_START) == 0)
 	{
-		//break; //temp
+		exit(0); //temp
 	}
 	else if (strcmp(identifier,ID_RX_STOP) == 0)
 	{
-		//break; //temp
+		exit(0); //temp
 	}
 	else if (strcmp(identifier,ID_RX_PWM_START) == 0)
 	{
@@ -210,33 +219,10 @@ void comm_ComputeInput(char * identifier, char * value)
 	}
 	else
 	{
-		//break;
+		exit(0);
 	}
 }
 
 
-void HAL_USART_RxCpltCallback(USART_HandleTypeDef *husart)
-{
-	/*
-	 * Protocole à la réception :
-	 *
-	 * 1. Traitement des données reçues
-	 *
-	 * 2. Réarmement de la réception en interruption des données
-	 *
-	 */
 
-	/* Decoupage données */
-	comm_SliceInput((char *)rx_data, ident_data, value_data);
-
-	/* Traitement données */
-	comm_ComputeInput(ident_data, value_data);
-
-	debugled_Toggle();
-	printf("RECEIVED MESSAGE");
-
-	/* Réarmement réception */
-	//HAL_StatusTypeDef HAL_USART_Receive_IT(USART_HandleTypeDef *husart, uint8_t *pRxData, uint16_t Size)
-	HAL_USART_Receive_IT(&husart2, rx_data, RX_BUFFER_SIZE);
-}
 

@@ -1,6 +1,6 @@
-../Core/Src/comm.c:75:6:comm_Init	8	static
-../Core/Src/comm.c:86:6:slice_str	32	static
-../Core/Src/comm.c:99:6:comm_SendData	8	static
-../Core/Src/comm.c:125:6:comm_SliceInput	40	static
-../Core/Src/comm.c:141:6:comm_ComputeInput	24	static
-../Core/Src/comm.c:218:6:HAL_USART_RxCpltCallback	16	static
+../Core/Src/comm.c:78:6:comm_Init	4	static
+../Core/Src/comm.c:84:6:debug_readRx	4	static
+../Core/Src/comm.c:93:6:slice_str	32	static
+../Core/Src/comm.c:106:6:comm_SendData	8	static
+../Core/Src/comm.c:132:6:comm_SliceInput	48	static
+../Core/Src/comm.c:150:6:comm_ComputeInput	24	static
