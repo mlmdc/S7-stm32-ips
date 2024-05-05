@@ -1,6 +1,6 @@
+"./Core/Src/accelerometer.o"
 "./Core/Src/adc.o"
 "./Core/Src/comm.o"
-"./Core/Src/current.o"
 "./Core/Src/dma.o"
 "./Core/Src/gpio.o"
 "./Core/Src/main.o"

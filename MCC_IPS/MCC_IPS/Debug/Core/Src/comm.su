@@ -1,6 +1,8 @@
-../Core/Src/comm.c:78:6:comm_Init	4	static
-../Core/Src/comm.c:84:6:debug_readRx	4	static
-../Core/Src/comm.c:93:6:slice_str	32	static
-../Core/Src/comm.c:106:6:comm_SendData	8	static
-../Core/Src/comm.c:132:6:comm_SliceInput	48	static
-../Core/Src/comm.c:150:6:comm_ComputeInput	24	static
+../Core/Src/comm.c:84:6:comm_Init	4	static
+../Core/Src/comm.c:90:6:debug_readRx	4	static
+../Core/Src/comm.c:99:6:slice_str	32	static
+../Core/Src/comm.c:108:8:slice_str_r	40	static
+../Core/Src/comm.c:119:9:get_used_bytes	24	static
+../Core/Src/comm.c:135:6:comm_SendData	96	static
+../Core/Src/comm.c:158:6:comm_SliceInput	48	static
+../Core/Src/comm.c:176:6:comm_ComputeInput	24	static

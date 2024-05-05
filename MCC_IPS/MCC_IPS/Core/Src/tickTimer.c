@@ -6,6 +6,7 @@
  */
 
 #include "tickTimer.h"
+#include "main.h"
 
 TIM_HandleTypeDef    TimHandle_period;
 
@@ -35,5 +36,15 @@ void tickTimer_Init(int period)
  * void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {code}
 */
+void tickTimer_Start(void)
+{
+	//enable the action timer
+	NVIC_EnableIRQ(TIM2_IRQn);
+}
 
+void tickTimer_Stop(void)
+{
+	//disable the action timer
+	NVIC_DisableIRQ(TIM2_IRQn);
+}
 

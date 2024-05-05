@@ -1,6 +1,0 @@
-current.c:44:6:current_Init	1
-current.c:55:6:HAL_ADC_ConvCpltCallback	2
-current.c:67:6:adc_ReadDataBlocking	2
-current.c:81:6:adc_int2flt	2
-current.c:91:6:adc_EWMAverage	2
-current.c:107:6:adc_GetValue	1

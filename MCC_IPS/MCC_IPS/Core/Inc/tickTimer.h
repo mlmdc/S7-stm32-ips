@@ -13,6 +13,9 @@
 
 void tickTimer_Init(int);
 
+void tickTimer_Start(void);
+
+void tickTimer_Stop(void);
 
 #endif /* INC_TICKTIMER_H_ */
 

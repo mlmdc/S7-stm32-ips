@@ -31,8 +31,8 @@ Core/Src/comm.o: ../Core/Src/comm.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Core/Inc/comm.h ../Core/Inc/main.h ../Core/Inc/speed.h \
- ../Core/Inc/current.h ../Core/Inc/usart.h ../Core/Inc/pwmCommand.h \
- ../Core/Inc/pidFilter.h ../Core/Inc/mccCommand.h
+ ../Core/Inc/accelerometer.h ../Core/Inc/usart.h ../Core/Inc/pwmCommand.h \
+ ../Core/Inc/tickTimer.h ../Core/Inc/pidFilter.h ../Core/Inc/mccCommand.h
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -68,8 +68,9 @@ Core/Src/comm.o: ../Core/Src/comm.c ../Core/Inc/main.h \
 ../Core/Inc/comm.h:
 ../Core/Inc/main.h:
 ../Core/Inc/speed.h:
-../Core/Inc/current.h:
+../Core/Inc/accelerometer.h:
 ../Core/Inc/usart.h:
 ../Core/Inc/pwmCommand.h:
+../Core/Inc/tickTimer.h:
 ../Core/Inc/pidFilter.h:
 ../Core/Inc/mccCommand.h:

@@ -9,9 +9,10 @@
 #include "main.h"
 #include "comm.h"
 #include "speed.h"
-#include "current.h"
+#include "accelerometer.h"
 #include "usart.h"
 #include "pwmCommand.h"
+#include "tickTimer.h"
 #include "pidFilter.h"
 #include "mccCommand.h"
 #include <stdio.h>
@@ -48,6 +49,10 @@
 */
 
 #define ID_RX_ACK			"0xFF"
+#define ID_RX_CALIBRATE 	"0xFE"
+#define ID_RX_CALIB_ZEROG 	"0xFA"
+#define ID_RX_CALIB_MINUSG 	"0xFB"
+#define ID_RX_CALIB_PLUSG 	"0xFC"
 
 #define ID_RX_SEND_KP		"0x0A"
 #define ID_RX_SET_KP		"0x0B"
@@ -62,19 +67,20 @@
 //ALL UNSIGNED CHAR
 //ID size = 4 chars
 #define ID_TX_TIME			"0x01"
-#define ID_TX_ADC			"0x10"
+#define ID_TX_ADC			"0x09"
+#define ID_TX_ACC			"0x10"
 #define ID_TX_PWM			"0x11"
 #define ID_TX_RPM			"0x12"
 #define ID_TX_DIR			"0x13"
 #define ID_TX_ACK			"0xFF"
 
+volatile int comm_ack = 0;
+volatile int comm_start = 0;
+volatile int comm_stop = 0;
 
-//extern void dyn_rcv_cb(uint8_t car);
-/*
-unsigned char rx_data[RX_BUFFER_SIZE];
-char ident_data[4];
-char value_data[RX_BUFFER_SIZE-4];
-*/
+char tx_data[64];
+char *tx_buffer;
+
 void comm_Init(void)
 {
 	/* USART RECEPTION */
@@ -99,6 +105,29 @@ void slice_str(const char * str, char * buffer, size_t start, size_t end)
     buffer[j] = 0;
 }
 
+char * slice_str_r(const char * str, size_t start, size_t end)
+{
+	char * buffer;
+	size_t j = 0;
+	for (size_t i = start; i <= end; ++i ) {
+	      buffer[j++] = str[i];
+	}
+	buffer[j] = 0;
+	return buffer;
+}
+
+uint8_t get_used_bytes(const char *source)
+{
+	for (int i = 0; i < 64; i++)
+	{
+		if (source[i] == '\r')
+		{
+			return i;
+		}
+	}
+	return 0;
+}
+
 //====================================================================
 //			USART TX
 //====================================================================
@@ -107,21 +136,18 @@ void comm_SendData(void)
 {
 	//DATA_FORMAT : tx_data[x] = [ID_TX_TypeOfData]+[TypeOfData_0]+...+[TypeOfData_n]+[ID_TX_TypeOfData...]+...
 
-	//printf("\n\r");
-	/* TIME */
-	printf("%s;", ID_TX_TIME); //hex id
-	printf("%i;", (int)HAL_GetTick());
-	/* ADC */
-	printf("%s;", ID_TX_ADC); //hex id
-	printf("%f;", ADC_LastValue);
-	/* PWM */
-	printf("%s;", ID_TX_PWM); //hex id
-	printf("%u;", (unsigned int)PWM_Value); //uchar typecast for warning
-	/* PWM */
-	printf("%s;", ID_TX_RPM); //hex id
-	printf("%f;", output_speed);
+	sprintf(tx_data,"%s;%i;%s;%f;%s;%f;%s;%i;%s;%f;\n\r", //Only 1 line for sprintf
+			ID_TX_TIME, (int)HAL_GetTick(),
+			ID_TX_ADC, acc_LastVoltage,
+			ID_TX_ACC, acc_LastAccel,
+			ID_TX_PWM, (int)PWM_Value,
+			ID_TX_RPM, output_speed);
 
-	printf("\n\r");
+	uint8_t used_len = get_used_bytes(tx_data);
+
+	HAL_UART_Transmit_DMA(&huart2,
+			(uint8_t *)slice_str_r(tx_data, 0, used_len+2),
+			(used_len+2));
 }
 
 
@@ -153,14 +179,41 @@ void comm_ComputeInput(char * identifier, char * value)
 	 * str 1 == str 2 compare the address
 	 * strcmp(str1,str2) compare the content
 	 */
-
-	if (strcmp(identifier,ID_RX_START) == 0)
+	if (strcmp(identifier,ID_RX_ACK) == 0)
 	{
-		exit(0); //temp
+		comm_ack = 1;
+	}
+	else if (strcmp(identifier,ID_RX_START) == 0)
+	{
+		comm_start = 1;
+		tickTimer_Start();
+		comm_start = 0;
+	}
+	else if (strcmp(identifier,ID_RX_CALIBRATE) == 0)
+	{
+		comm_ack = 0;
+		acc_Calibrate();
+	}
+	else if (strcmp(identifier,ID_RX_CALIB_ZEROG) == 0)
+	{
+		comm_ack = 0;
+		acc_CalibrationZeroG();
+	}
+	else if (strcmp(identifier,ID_RX_CALIB_MINUSG) == 0)
+	{
+		comm_ack = 0;
+		acc_CalibrationMinusG();
+	}
+	else if (strcmp(identifier,ID_RX_CALIB_PLUSG) == 0)
+	{
+		comm_ack = 0;
+		acc_CalibrationPlusG();
 	}
 	else if (strcmp(identifier,ID_RX_STOP) == 0)
 	{
-		exit(0); //temp
+		comm_stop = 1;
+		tickTimer_Stop();
+		comm_stop = 0;
 	}
 	else if (strcmp(identifier,ID_RX_PWM_START) == 0)
 	{

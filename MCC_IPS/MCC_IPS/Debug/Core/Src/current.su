@@ -1,6 +1,0 @@
-../Core/Src/current.c:44:6:current_Init	8	static
-../Core/Src/current.c:55:6:HAL_ADC_ConvCpltCallback	16	static
-../Core/Src/current.c:67:6:adc_ReadDataBlocking	24	static
-../Core/Src/current.c:81:6:adc_int2flt	24	static
-../Core/Src/current.c:91:6:adc_EWMAverage	24	static
-../Core/Src/current.c:107:6:adc_GetValue	8	static

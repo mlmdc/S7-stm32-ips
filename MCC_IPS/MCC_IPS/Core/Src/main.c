@@ -27,7 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "comm.h"
-#include "current.h"
+#include "accelerometer.h"
 #include "pwmCommand.h"
 #include "mccCommand.h"
 #include "pidFilter.h"
@@ -60,6 +60,9 @@ volatile uint32_t ms_value = 0;
 unsigned char rx_data[16];
 char ident_data[5];
 char value_data[13];
+
+uint32_t init_time = 0;
+uint32_t next_time = 0;
 
 uint32_t test;
 
@@ -145,16 +148,18 @@ int main(void)
   pidFilter_SetCommand(100.0f);
 
   /* DMA ADC INIT*/
-   current_Init();
-   printf("ADC COMPUTE INIT PASSED\n\r");
+  acc_Init();
+  printf("ADC COMPUTE INIT PASSED\n\r");
 
   /* USART RECEPTION */
   HAL_UART_Receive_IT(&huart2, rx_data, 16);
+
 
   /* TIM2 Global interruptions */
   tickTimer_Init(10); // period in ms
   printf("tickTimer2 INIT PASSED\n\r");
 
+  //tickTimer_Start();
   /* Initial tickTime */
   /* USER CODE END 2 */
 
@@ -165,7 +170,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
   }
   /* USER CODE END 3 */
 }
@@ -243,9 +247,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 */
 
 
-	encoder_GetSpeed();
-	//adc_GetValue();
-	//printf("ADC VALUE %f \n\r", ADC_LastValue);
+
 	//printf("MOTOR SPEED %f \n\r", output_speed);
 	//printf("PWM_Value %i \n\r", (int)PWM_Value);
 
@@ -254,12 +256,21 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	//====================================================================
 	// Constante de temps mécanique tm : 13ms
 	// Stabilisation du moteur après sa commande : 5*tm
-	if ((ms_value % 20) == 0)
+	if ((ms_value % 1) == 0)
 	{
 		//encoder_GetSpeed();
 		//printf("MOTOR SPEED %f \n\r", output_speed);
 		//pidFilter_Compute();
 		//debug_readRx();
+		//
+		//acc_GetValue();
+		//printf("ADC VALUE %f \n\r", acc_LastVoltage);
+		//acc_Voltage2Accel();
+		//printf("Accel %f\n\r", acc_LastAccel);
+		acc_GetValue();
+		acc_Voltage2Accel();
+		comm_SendData();
+
 	}
 
 	//====================================================================
@@ -268,9 +279,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if ((ms_value % 100) == 0)
 	{
 		//ms_value = 0;
-		adc_GetValue();
-
-		comm_SendData();
 		//printf("HAL_GetTick = %i\n\r", (int)HAL_GetTick());
 	}
 }
