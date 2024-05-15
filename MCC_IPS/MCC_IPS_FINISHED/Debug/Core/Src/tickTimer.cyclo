@@ -1,0 +1,5 @@
+core_cm4.h:1688:22:__NVIC_EnableIRQ	2
+core_cm4.h:1724:22:__NVIC_DisableIRQ	2
+tickTimer.c:17:6:tickTimer_Init	1
+tickTimer.c:39:6:tickTimer_Start	1
+tickTimer.c:45:6:tickTimer_Stop	1

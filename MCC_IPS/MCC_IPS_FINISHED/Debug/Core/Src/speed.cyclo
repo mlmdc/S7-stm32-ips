@@ -1,0 +1,6 @@
+speed.c:29:6:encoder_Init	1
+speed.c:44:10:encoder_FetchPosition	1
+speed.c:50:6:encoder_UpdatePosition	1
+speed.c:56:6:encoder_GetSpeed	2
+speed.c:94:6:encoder_CallbackIndex	2
+speed.c:119:6:HAL_GPIO_EXTI_Callback	2

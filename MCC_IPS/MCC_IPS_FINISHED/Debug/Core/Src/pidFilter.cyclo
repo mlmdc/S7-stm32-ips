@@ -1,0 +1,9 @@
+pidFilter.c:41:6:pidFilter_Init	1
+pidFilter.c:62:6:pidFilter_SetKp	1
+pidFilter.c:67:6:pidFilter_SetKi	1
+pidFilter.c:72:6:pidFilter_SetKd	1
+pidFilter.c:77:6:pidFilter_SetCommand	1
+pidFilter.c:82:6:pidFilter_SetCommandVoltage	1
+pidFilter.c:89:6:pidFilter_SetOuterSpeedCommand	1
+pidFilter.c:95:6:pidFilter_SetFrequency	1
+pidFilter.c:101:6:pidFilter_Compute	3

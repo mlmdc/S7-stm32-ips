@@ -1,0 +1,5 @@
+../Drivers/CMSIS/Include/core_cm4.h:1688:22:__NVIC_EnableIRQ	16	static
+../Drivers/CMSIS/Include/core_cm4.h:1724:22:__NVIC_DisableIRQ	16	static,ignoring_inline_asm
+../Core/Src/tickTimer.c:17:6:tickTimer_Init	24	static
+../Core/Src/tickTimer.c:39:6:tickTimer_Start	8	static
+../Core/Src/tickTimer.c:45:6:tickTimer_Stop	8	static

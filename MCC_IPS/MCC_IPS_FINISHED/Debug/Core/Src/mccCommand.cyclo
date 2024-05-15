@@ -1,0 +1,7 @@
+mccCommand.c:23:6:debugled_SetOn	1
+mccCommand.c:28:6:debugled_SetOff	1
+mccCommand.c:33:6:debugled_Toggle	2
+mccCommand.c:47:6:mcc_SetCW	1
+mccCommand.c:54:6:mcc_SetCCW	1
+mccCommand.c:61:6:mcc_SetMagnet	2
+mccCommand.c:76:6:mcc_ToggleDir	2
