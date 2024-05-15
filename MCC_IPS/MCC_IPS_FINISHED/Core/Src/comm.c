@@ -6,10 +6,10 @@
  */
 
 
+#include "current.h"
 #include "main.h"
 #include "comm.h"
 #include "speed.h"
-#include "accelerometer.h"
 #include "usart.h"
 #include "pwmCommand.h"
 #include "tickTimer.h"
@@ -137,26 +137,14 @@ uint8_t get_used_bytes(const char *source)
 //			USART TX
 //====================================================================
 
-void comm_addData(uint32_t ms_value)
-{
-	sprintf(tx_data_array[add_data_index],"%s;%i;%s;%f;%s;%f;%s;%i;%s;%f;\n\r", //Only 1 line for sprintf
-				ID_TX_TIME, (int)ms_value,
-				ID_TX_ADC, acc_LastVoltage,
-				ID_TX_ACC, acc_LastAccel,
-				ID_TX_PWM, (int)PWM_Value,
-				ID_TX_RPM, output_speed);
-	add_data_index++;
-}
-
 
 void comm_SendData(uint32_t msvalue)
 {
 	//DATA_FORMAT : tx_data[x] = [ID_TX_TypeOfData]+[TypeOfData_0]+...+[TypeOfData_n]+[ID_TX_TypeOfData...]+...
 
-	sprintf(tx_data,"%s;%i;%s;%f;%s;%f;%s;%i;%s;%f;\n\r", //Only 1 line for sprintf
+	sprintf(tx_data,"%s;%i;%s;%f;%s;%i;%s;%f;\n\r", //Only 1 line for sprintf
 			ID_TX_TIME, (int)HAL_GetTick(),//msvalue,
-			ID_TX_ADC, acc_LastVoltage,
-			ID_TX_ACC, acc_LastAccel,
+			ID_TX_ADC, current_LastVoltage,
 			ID_TX_PWM, (int)PWM_Value,
 			ID_TX_RPM, output_speed);
 
@@ -212,26 +200,6 @@ void comm_ComputeInput(char * identifier, char * value)
 			tickTimer_Stop();
 			comm_start = 0;
 		}
-	else if (strcmp(identifier,ID_RX_CALIBRATE) == 0)
-	{
-		comm_ack = 0;
-		acc_Calibrate();
-	}
-	else if (strcmp(identifier,ID_RX_CALIB_ZEROG) == 0)
-	{
-		comm_ack = 0;
-		acc_CalibrationZeroG();
-	}
-	else if (strcmp(identifier,ID_RX_CALIB_MINUSG) == 0)
-	{
-		comm_ack = 0;
-		acc_CalibrationMinusG();
-	}
-	else if (strcmp(identifier,ID_RX_CALIB_PLUSG) == 0)
-	{
-		comm_ack = 0;
-		acc_CalibrationPlusG();
-	}
 	else if (strcmp(identifier,ID_RX_STOP) == 0)
 	{
 		comm_stop = 1;
@@ -293,11 +261,6 @@ void comm_ComputeInput(char * identifier, char * value)
 		/* No data sanitization */
 		pidFilter_SetKd((float)atof(value));
 	}
-	else if (strcmp(identifier,ID_RX_SET_MAG) == 0)
-		{
-			/* No data sanitization */
-			mcc_SetMagnet(atoi(value));
-		}
 	else
 	{
 

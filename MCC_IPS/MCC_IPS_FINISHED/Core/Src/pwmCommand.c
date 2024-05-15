@@ -47,8 +47,8 @@ void pwm_Init(void){
 
 	PWM_Toggle = 0;
 	PWM_Value = 0;
-	TIM11->CCR1 = 10;
-	HAL_TIM_PWM_Start(&htim11, TIM_CHANNEL_1);
+	TIM3->CCR1 = 10;
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 }
 
 void pwm_SetDuty(float duty) //
@@ -58,7 +58,7 @@ void pwm_SetDuty(float duty) //
 
 	//__HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_1, pulseCalc(duty));
 	PWM_Value = pulseCalc(duty);
-	TIM11->CCR1 = PWM_Value;
+	TIM3->CCR1 = PWM_Value;
 }
 
 
@@ -82,18 +82,18 @@ void pwm_SetVoltage(float voltage)
 		duty = (voltage*100.0f)/(24.0f);
 	}
 	PWM_Value = pulseCalc(duty);
-	TIM11->CCR1 = PWM_Value;
+	TIM3->CCR1 = PWM_Value;
 }
 
 void pwm_Enable(void)
 {
-	HAL_TIM_PWM_Start(&htim11, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
 	PWM_Toggle = 1;
 }
 
 void pwm_Disable(void)
 {
-	HAL_TIM_PWM_Stop(&htim11, TIM_CHANNEL_1);
+	HAL_TIM_PWM_Stop(&htim3, TIM_CHANNEL_1);
 	PWM_Toggle = 0;
 }
 

@@ -34,16 +34,17 @@ void encoder_Init(void)
 	speed = 0;
 	angle_position[0] = 0;
 	angle_position[1] = 0;
+	output_speed = 0.0f;
 
 	/* ENCODER INIT */
-	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_1);
-	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_2);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
 }
 
 
 uint16_t encoder_FetchPosition()
 {
-	int TIMCNT = TIM4->CNT;
+	int TIMCNT = TIM1->CNT;
 	return (uint16_t)TIMCNT;
 }
 
@@ -57,7 +58,7 @@ void encoder_GetSpeed()
 {
 	float delta_pos = 0; //init
 
-	if (__HAL_TIM_DIRECTION_STATUS(&htim4)==1)
+	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
 		{
 			//Nindex--;
 			// TEST
@@ -69,10 +70,10 @@ void encoder_GetSpeed()
 			// TEST
 			pos_count += encoder_FetchPosition();
 		}
-		__HAL_TIM_SetCounter(&htim4, 0);
+		__HAL_TIM_SetCounter(&htim1, 0);
 		/* ENCODER RESTART */
-		HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_1);
-		HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_2);
+		HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+		HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
 
 	encoder_UpdatePosition(); //fetch the position
 
@@ -93,7 +94,7 @@ void encoder_GetSpeed()
 
 void encoder_CallbackIndex()
 {
-	if (__HAL_TIM_DIRECTION_STATUS(&htim4)==1)
+	if (__HAL_TIM_DIRECTION_STATUS(&htim1)==1)
 	{
 		Nindex--;
 		// TEST
@@ -105,10 +106,10 @@ void encoder_CallbackIndex()
 		// TEST
 		pos_count += encoder_FetchPosition();
 	}
-	__HAL_TIM_SetCounter(&htim4, 0);
+	__HAL_TIM_SetCounter(&htim1, 0);
 	/* ENCODER RESTART */
-	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_1);
-	HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_2);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_1);
+	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_2);
 
 }
 

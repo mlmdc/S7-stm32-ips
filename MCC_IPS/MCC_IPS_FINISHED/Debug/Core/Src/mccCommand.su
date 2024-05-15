@@ -1,7 +1,3 @@
-../Core/Src/mccCommand.c:23:6:debugled_SetOn	8	static
-../Core/Src/mccCommand.c:28:6:debugled_SetOff	8	static
-../Core/Src/mccCommand.c:33:6:debugled_Toggle	8	static
-../Core/Src/mccCommand.c:47:6:mcc_SetCW	8	static
-../Core/Src/mccCommand.c:54:6:mcc_SetCCW	8	static
-../Core/Src/mccCommand.c:61:6:mcc_SetMagnet	16	static
-../Core/Src/mccCommand.c:76:6:mcc_ToggleDir	8	static
+../Core/Src/mccCommand.c:23:6:mcc_SetCW	8	static
+../Core/Src/mccCommand.c:29:6:mcc_SetCCW	8	static
+../Core/Src/mccCommand.c:36:6:mcc_ToggleDir	8	static

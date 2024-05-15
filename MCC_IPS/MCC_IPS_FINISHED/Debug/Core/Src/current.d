@@ -1,4 +1,4 @@
-Core/Src/accelerometer.o: ../Core/Src/accelerometer.c ../Core/Inc/adc.h \
+Core/Src/current.o: ../Core/Src/current.c ../Core/Inc/current.h \
  ../Core/Inc/main.h ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -30,9 +30,9 @@ Core/Src/accelerometer.o: ../Core/Src/accelerometer.c ../Core/Inc/adc.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
- ../Core/Inc/dma.h ../Core/Inc/main.h ../Core/Inc/comm.h \
- ../Core/Inc/accelerometer.h
-../Core/Inc/adc.h:
+ ../Core/Inc/adc.h ../Core/Inc/dma.h ../Core/Inc/main.h \
+ ../Core/Inc/comm.h
+../Core/Inc/current.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 ../Core/Inc/stm32f4xx_hal_conf.h:
@@ -65,7 +65,7 @@ Core/Src/accelerometer.o: ../Core/Src/accelerometer.c ../Core/Inc/adc.h \
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_tim_ex.h:
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h:
+../Core/Inc/adc.h:
 ../Core/Inc/dma.h:
 ../Core/Inc/main.h:
 ../Core/Inc/comm.h:
-../Core/Inc/accelerometer.h:

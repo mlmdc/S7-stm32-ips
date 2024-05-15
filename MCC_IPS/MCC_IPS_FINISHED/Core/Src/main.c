@@ -17,6 +17,7 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include "current.h"
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
@@ -27,7 +28,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "comm.h"
-#include "accelerometer.h"
 #include "pwmCommand.h"
 #include "mccCommand.h"
 #include "pidFilter.h"
@@ -119,10 +119,9 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_TIM3_Init();
-  MX_TIM11_Init();
-  MX_TIM4_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim11);
+  HAL_TIM_Base_Start(&htim3);
   printf("\n\r=== NEW SESSION ===\n\r");
 
   //INIT PERSOS
@@ -137,8 +136,7 @@ int main(void)
 
 
   /* MCC Set Direction */
-  mcc_SetCCW();
-  mcc_SetMagnet(0);
+  mcc_SetCW();
   printf("CW INIT PASSED\n\r");
 
   /* PID Init */
@@ -147,7 +145,7 @@ int main(void)
   pidFilter_SetCommand(0.0f);
 
   /* DMA ADC INIT*/
-  acc_Init();
+  current_Init();
   printf("ADC COMPUTE INIT PASSED\n\r");
 
   /* USART RECEPTION */
@@ -155,7 +153,7 @@ int main(void)
 
 
   /* TIM2 Global interruptions */
-  tickTimer_Init(1); // period in ms
+  tickTimer_Init(10); // period in ms
   printf("tickTimer2 INIT PASSED\n\r");
 
   //tickTimer_Start();
@@ -246,7 +244,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	 * 4. Envoi des données
 	 */
 
-	mcc_SetMagnet(1);
 
 	//printf("MOTOR SPEED %f \n\r", output_speed);
 	//printf("PWM_Value %i \n\r", (int)PWM_Value);
@@ -262,11 +259,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		encoder_GetSpeed();
 
-		acc_GetValue();
-
-		acc_Voltage2Accel();
+		current_GetValue();
 
 		comm_SendData(ms_value);
+
+		pidFilter_Compute();
 
 	}
 
@@ -275,9 +272,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	//====================================================================
 	if ((ms_value % 10) == 0)
 	{
-		pidFilter_Compute();
+
 	}
-	mcc_SetMagnet(0);
 }
 }
 

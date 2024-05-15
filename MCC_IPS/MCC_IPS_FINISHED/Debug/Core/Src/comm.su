@@ -3,7 +3,6 @@
 ../Core/Src/comm.c:104:6:slice_str	32	static
 ../Core/Src/comm.c:113:8:slice_str_r	40	static
 ../Core/Src/comm.c:124:9:get_used_bytes	24	static
-../Core/Src/comm.c:140:6:comm_addData	104	static
-../Core/Src/comm.c:152:6:comm_SendData	104	static
-../Core/Src/comm.c:175:6:comm_SliceInput	48	static
-../Core/Src/comm.c:193:6:comm_ComputeInput	24	static
+../Core/Src/comm.c:141:6:comm_SendData	80	static
+../Core/Src/comm.c:163:6:comm_SliceInput	48	static
+../Core/Src/comm.c:181:6:comm_ComputeInput	24	static

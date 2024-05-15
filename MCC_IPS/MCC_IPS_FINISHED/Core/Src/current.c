@@ -5,11 +5,11 @@
  *      Author: amay
  */
 
+#include "current.h"
 #include "adc.h"
 #include "dma.h"
 #include "main.h"
 #include "comm.h"
-#include "accelerometer.h"
 
 #define N_CONVERSIONS 8
 #define USE_12BIT_RESOLUTION 1
@@ -21,31 +21,22 @@
 #endif
 
 
-volatile float acc_LastVoltage;
-volatile float acc_LastAccel;
-volatile float acc_zeroG;
-volatile float acc_minusG;
-volatile float acc_plusG;
-volatile float acc_VperG;
+volatile float current_LastVoltage;
 
-uint32_t acc_rawIntData[N_CONVERSIONS];
-float acc_fltData[N_CONVERSIONS];
+uint32_t current_rawIntData[N_CONVERSIONS];
+float current_fltData[N_CONVERSIONS];
 static uint32_t ADC_DATA_BUFFER;
 int conv_index = 0;
 
 extern uint32_t test;
 
-void acc_Init(void)
+void current_Init(void)
 {
 	/*
 	 * Tconv = (Sampling_Time + 12Bits)/(APB2_CLOCK/4) *
 	 */
 	/* accelerodata */
-	acc_LastVoltage = 0.0f;
-	acc_zeroG = 0.0f;
-	acc_minusG = 0.0f;
-	acc_plusG = 0.0f;
-	acc_VperG = 0.0f;
+	current_LastVoltage = 0.0f;
 
 	ADC1->SMPR2 |= (uint32_t)(0x7); //SET SAMPLING TIME TO 480 CYCLES, FCONV = 42.7 kHz, TCONV = 2.342 10^-5 s
 	HAL_ADC_Start_DMA (&hadc1, &ADC_DATA_BUFFER, 1);
@@ -54,7 +45,7 @@ void acc_Init(void)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-   acc_rawIntData[conv_index] = ADC_DATA_BUFFER;
+   current_rawIntData[conv_index] = ADC_DATA_BUFFER;
    //ADC1->CR2 |= ADC_CR2_DDS;
    conv_index++;
    if (conv_index >= N_CONVERSIONS)
@@ -64,7 +55,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 }
 
-void acc_ReadDataBlocking(uint32_t* destination)
+void current_ReadDataBlocking(uint32_t* destination)
 {
 	for (int it = 0; it < (int)N_CONVERSIONS; it++)
 	{
@@ -79,7 +70,7 @@ void acc_ReadDataBlocking(uint32_t* destination)
 }
 
 /* Converts int 0-4095 to float 0-3.3, representing the voltage */
-void acc_int2flt(uint32_t* source, float* destination)
+void current_int2flt(uint32_t* source, float* destination)
 {
 	for (int n = 0; n < N_CONVERSIONS; n++)
 	{
@@ -89,7 +80,7 @@ void acc_int2flt(uint32_t* source, float* destination)
 
 //For best accuracy
 // The higher the value of alpha, the more closely the EWMA tracks the original time series
-float acc_EWMAverage(float* source, float alpha)
+float current_EWMAverage(float* source, float alpha)
 {
 	//EWMA Formula :
 	//EWMA[x] = alpha*source[x] + (1-alpha)*EWMA[x-1]
@@ -103,51 +94,13 @@ float acc_EWMAverage(float* source, float alpha)
 	return avgd_value;
 }
 
-void acc_Voltage2Accel(void)
-{
-	//Prendre Valeur Voltage
-	acc_GetValue();
-	acc_LastAccel = ((acc_zeroG-acc_LastVoltage)/acc_VperG);
-
-}
-
 //example value
-void acc_GetValue(void)
+void current_GetValue(void)
 {
-	acc_int2flt(acc_rawIntData, acc_fltData);
+	current_int2flt(current_rawIntData, current_fltData);
 
-	acc_LastVoltage = acc_EWMAverage(acc_fltData, 0.5f);
+	current_LastVoltage = current_EWMAverage(current_fltData, 0.5f);
 
 }
 
-//====================================================================
-//			accelerometer calibration
-//====================================================================
-
-void acc_CalibrationZeroG(void)
-{
-	acc_GetValue();
-	acc_zeroG = acc_LastVoltage;
-}
-
-void acc_CalibrationMinusG(void)
-{
-	acc_GetValue();
-	acc_minusG = acc_LastVoltage;
-}
-
-void acc_CalibrationPlusG(void)
-{
-	acc_GetValue();
-	acc_plusG = acc_LastVoltage;
-}
-
-void acc_Calibrate(void)
-{
-	float zeroG_c = 0.0f;
-
-	zeroG_c = (acc_minusG+acc_plusG)/2;
-	acc_zeroG = (acc_zeroG+zeroG_c)/2;
-	acc_VperG = ((acc_zeroG-acc_plusG) + (acc_minusG - acc_zeroG))/2;
-}
 

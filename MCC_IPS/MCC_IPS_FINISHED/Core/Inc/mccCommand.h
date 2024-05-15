@@ -11,17 +11,11 @@
 
 #include "main.h"
 
-void debugled_SetOn(void);
-
-void debugled_SetOff(void);
-
-void debugled_Toggle(void);
 
 void mcc_SetCW(void);
 
 void mcc_SetCCW(void);
 
-void mcc_SetMagnet(int state);
 
 void mcc_ToggleDir(void);
 
