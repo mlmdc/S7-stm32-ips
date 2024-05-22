@@ -1,8 +1,0 @@
-comm.c:84:6:comm_Init	1
-comm.c:90:6:debug_readRx	1
-comm.c:99:6:slice_str	2
-comm.c:108:8:slice_str_r	2
-comm.c:119:9:get_used_bytes	3
-comm.c:135:6:comm_SendData	1
-comm.c:158:6:comm_SliceInput	1
-comm.c:176:6:comm_ComputeInput	18

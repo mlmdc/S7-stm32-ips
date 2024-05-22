@@ -1,7 +1,0 @@
-../Core/Src/mccCommand.c:22:6:debugled_SetOn	8	static
-../Core/Src/mccCommand.c:27:6:debugled_SetOff	8	static
-../Core/Src/mccCommand.c:32:6:debugled_Toggle	8	static
-../Core/Src/mccCommand.c:46:6:mcc_SetCW	8	static
-../Core/Src/mccCommand.c:52:6:mcc_SetCCW	8	static
-../Core/Src/mccCommand.c:58:6:mcc_SetBraking	16	static
-../Core/Src/mccCommand.c:63:6:mcc_ToggleDir	8	static

@@ -1,8 +1,0 @@
-../Core/Src/pidFilter.c:40:6:pidFilter_Init	4	static
-../Core/Src/pidFilter.c:61:6:pidFilter_SetKp	16	static
-../Core/Src/pidFilter.c:66:6:pidFilter_SetKi	16	static
-../Core/Src/pidFilter.c:71:6:pidFilter_SetKd	16	static
-../Core/Src/pidFilter.c:76:6:pidFilter_SetCommand	16	static
-../Core/Src/pidFilter.c:81:6:pidFilter_SetCommandVoltage	24	static
-../Core/Src/pidFilter.c:88:6:pidFilter_SetOuterSpeedCommand	16	static
-../Core/Src/pidFilter.c:95:6:pidFilter_Compute	8	static
