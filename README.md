@@ -1,7 +1,7 @@
 # stm32_ips
 
 Partie STM32 du projet d'asservissement d'un MCC du groupe C5.
-Printemps 2024.
+Printemps 2024
 
 ## Objectifs
 
