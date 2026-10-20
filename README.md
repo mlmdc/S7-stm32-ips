@@ -1,95 +1,127 @@
 # STM32 IPS — DC motor speed control / Asservissement en vitesse d’un moteur à courant continu
 
-**EN** Firmware for measuring and controlling a brushed DC motor with an STM32F411: encoder-based speed feedback, PWM drive, current-sense voltage acquisition and UART telemetry.
+Firmware and supporting notebooks for studying the speed control and measurement of a brushed DC motor with an STM32F411RE.
 
-**FR** Firmware de mesure et de commande d’un moteur à courant continu avec un STM32F411 : retour de vitesse par encodeur, commande PWM, acquisition de la tension du shunt et télémétrie UART.
+[Back to portfolio / Retour au portfolio](https://github.com/mlmdc) · [Contents / Sommaire](#contents--sommaire)
 
-[Back to portfolio / Retour au portfolio](https://github.com/mlmdc) · [Contents](#contents)
-
-## Contents
+## Contents / Sommaire
 
 - [Overview / Présentation](#overview--présentation)
-- [Problem & approach / Problématique & approche](#problem--approach--problématique--approche)
+- [Problem and approach / Problématique et approche](#problem-and-approach--problématique-et-approche)
+- [Firmware methods / Méthodes du firmware](#firmware-methods--méthodes-du-firmware)
 - [Technical decisions / Choix techniques](#technical-decisions--choix-techniques)
-- [Results & learnings / Résultats--enseignements)
-- [Getting started](#getting-started)
+- [Experiments and limits / Expériences et limites](#experiments-and-limits--expériences-et-limites)
+- [Getting started / Démarrage](#getting-started--démarrage)
+- [Repository structure / Structure du dépôt](#repository-structure--structure-du-dépôt)
+- [Acknowledgments / Remerciements](#acknowledgments--remerciements)
 
 ## Overview / Présentation
 
-**EN** This project implements the embedded part of a motor-speed control system. It is intended for use with a DC motor, its encoder and a power driver. The firmware samples the encoder and a shunt-connected ADC input, updates a discrete PID controller, drives the motor with PWM and exchanges commands and measurements over USART2. The repository also contains Jupyter notebooks for motor and controller simulations and serial-data analysis.
+**EN** This repository combines STM32 firmware with notebooks for modeling a motor and processing serial measurements. On the STM32F411RE, the firmware estimates shaft speed from an incremental encoder, runs a discrete PID controller, and drives a motor-driver input with PWM. An ADC input measures the voltage connected to the current-sense shunt, while USART2 carries telemetry and fixed-size commands. The notebooks contain unloaded and loaded motor simulations, serial acquisition routines, and data post-processing; they are supporting study materials rather than a documented quantitative validation of the firmware.
 
-**FR** Ce projet réalise la partie embarquée d’un système d’asservissement en vitesse. Il est destiné à fonctionner avec un moteur à courant continu, son encodeur et un étage de puissance. Le firmware lit l’encodeur et une entrée ADC reliée au shunt, met à jour un correcteur PID discret, commande le moteur en PWM et échange des commandes et mesures via USART2. Le dépôt contient également des notebooks Jupyter de simulation du moteur et du correcteur, ainsi que d’analyse des données série.
+**FR** Ce dépôt regroupe un firmware STM32 et des notebooks de modélisation du moteur et de traitement de mesures série. Sur le STM32F411RE, le firmware estime la vitesse de l’arbre à partir d’un encodeur incrémental, exécute un PID discret et commande une entrée de l’étage moteur en PWM. Une entrée ADC mesure la tension reliée au shunt de mesure, tandis qu’USART2 transporte la télémétrie et des commandes de taille fixe. Les notebooks comprennent des simulations du moteur à vide et en charge, des routines d’acquisition série et du post-traitement ; ils constituent des supports d’étude, pas une validation quantitative documentée du firmware.
+
+## Problem and approach / Problématique et approche
+
+**EN** The firmware brings speed feedback, motor actuation, and auxiliary voltage acquisition together on a microcontroller. Its main inputs are encoder counts, the ADC voltage, a speed reference held by the firmware, and UART commands. A timer schedules the speed estimate and controller update; the controller output is converted to PWM duty cycle, while the shunt-voltage measurement is sent as telemetry. Motor direction is controlled separately from the speed loop.
+
+The notebooks address the same system from two complementary angles: `SIM_Moteur.ipynb` and `SIM_MOTEUR_MOTEURS.ipynb` simulate motor and controller behavior under different model and sampling assumptions; `stm32_com.ipynb` explores serial communication, data acquisition, and post-processing. These models can help formulate experiments, but their outputs do not establish how the physical motor performs.
+
+**FR** Le firmware réunit le retour de vitesse, la commande du moteur et une acquisition auxiliaire de tension sur un microcontrôleur. Ses principales entrées sont les comptes de l’encodeur, la tension mesurée par l’ADC, une consigne de vitesse conservée dans le firmware et les commandes UART. Un timer cadence l’estimation de vitesse et la mise à jour du correcteur ; la sortie du correcteur est convertie en rapport cyclique PWM, tandis que la tension du shunt est transmise en télémétrie. Le sens du moteur est commandé séparément de la boucle de vitesse.
+
+Les notebooks abordent le même système sous deux angles complémentaires : `SIM_Moteur.ipynb` et `SIM_MOTEUR_MOTEURS.ipynb` simulent le moteur et le correcteur avec différentes hypothèses de modèle et de période d’échantillonnage ; `stm32_com.ipynb` explore la communication série, l’acquisition et le post-traitement des données. Ces modèles peuvent aider à préparer des expériences, mais leurs résultats ne caractérisent pas à eux seuls le comportement du moteur réel.
 
 ```mermaid
 flowchart LR
-    Encoder[Motor encoder] -->|TIM1 position| Speed[Speed estimate]
-    Shunt[Shunt voltage] -->|ADC1 + DMA| Current[Filtered measurement]
-    Speed --> PID[Discrete PID<br/>10 ms control loop]
-    PID -->|voltage setpoint| PWM[TIM3 PWM]
-    Direction[Direction command] --> Driver[Motor driver]
+    Encoder[Motor encoder] -->|TIM1 counts| Speed[Speed estimate]
+    Speed --> PID[Discrete PID<br/>10 ms update]
+    Reference[Speed reference<br/>held in firmware] --> PID
+    PID -->|0–24 V command mapped to duty| PWM[TIM3 PWM]
+    Direction[UART direction command] --> Driver[Motor driver]
     PWM --> Driver
     Driver --> Motor[DC motor]
     Motor --> Encoder
-    Motor --> Shunt
-    UART[USART2<br/>commands and telemetry] <--> Firmware[STM32F411 firmware]
-    Speed --> Firmware
-    Current --> Firmware
+    Shunt[Shunt voltage] -->|ADC1 + DMA| Filter[Filtered voltage]
+    Filter --> Telemetry[USART2 telemetry]
+    Speed --> Telemetry
+    PWM --> Telemetry
+    UART[USART2 commands] --> Firmware[STM32F411RE firmware]
     Firmware --> PID
     Firmware --> PWM
     Firmware --> Direction
 ```
 
-## Problem & approach / Problématique & approche
-
-**EN** The project needed to combine motor actuation with repeatable speed and current-sense acquisition on a resource-constrained microcontroller. The implementation uses hardware timers and interrupts to schedule measurements and control, and a UART link to expose measurements and accept commands without requiring a separate host-side control application.
-
-**FR** Le projet devait associer la commande du moteur à des mesures de vitesse et de courant reproductibles sur un microcontrôleur à ressources limitées. L’implémentation s’appuie sur les timers et interruptions matériels pour cadencer les mesures et la commande, et sur une liaison UART pour transmettre les mesures et recevoir des commandes sans application de contrôle hôte dédiée.
-
-## Technical decisions / Choix techniques
-
-- **EN:** STM32F411RE with STM32Cube HAL and a CubeMX `.ioc` project; this keeps peripheral setup and the generated Eclipse-based project together.
-  **FR :** STM32F411RE avec STM32Cube HAL et projet CubeMX `.ioc` ; la configuration des périphériques et le projet Eclipse généré restent regroupés.
-- **EN:** TIM1 runs the quadrature encoder, TIM3 generates PWM, TIM2 schedules the 10 ms control step, and USART2 provides a 115200 baud serial interface.
-  **FR :** TIM1 lit l’encodeur en quadrature, TIM3 génère le PWM, TIM2 cadence la boucle à 10 ms et USART2 fournit une liaison série à 115200 bauds.
-- **EN:** ADC1 uses DMA for shunt-voltage sampling; eight samples are smoothed with an exponential moving average. This reduces per-sample processing, but the firmware does not document a calibrated conversion to amperes.
-  **FR :** ADC1 utilise le DMA pour acquérir la tension du shunt ; huit échantillons sont lissés par moyenne exponentielle. Cela limite le traitement par échantillon, mais le firmware ne documente pas de conversion étalonnée en ampères.
-- **EN:** The PID is implemented as a discrete difference equation and its output is clamped to 0–24 V before conversion to PWM duty cycle. This matches the one-direction voltage command implemented in the firmware; bidirectional drive and anti-windup are not implemented in this controller.
-  **FR :** Le PID est écrit sous forme d’équation aux différences et sa sortie est limitée à 0–24 V avant conversion en rapport cyclique PWM. Ce choix correspond à la commande de tension dans un seul sens présente dans le firmware ; cette implémentation ne gère ni la commande bidirectionnelle ni l’anti-windup.
-
-## Results & learnings
+## Firmware methods / Méthodes du firmware
 
 **EN**
 
-- The firmware integrates encoder speed measurement, shunt-voltage acquisition, PWM/direction control, a discrete PID and UART telemetry in one STM32Cube project.
-- The notebooks provide a starting point for motor/controller simulation and serial-data processing; the repository does not report quantitative bench validation or controller-performance results.
-- Current measurement is still expressed as a filtered ADC voltage, not calibrated amperes. Further work includes characterizing the shunt and sensor chain, validating the control response on the motor, and documenting the UART protocol and repeatable test results.
+- **Speed feedback:** TIM1 counts the quadrature encoder. Every 10 ms, the firmware converts the count change to a speed in RPM using a hard-coded 2,000-counts-per-revolution assumption.
+- **Control and actuation:** the PID uses the difference between its stored reference and the absolute measured speed. Its discrete difference equation updates a voltage command, clamped to 0–24 V and mapped linearly to TIM3 channel 1 PWM duty cycle. The direction output is handled separately.
+- **Voltage acquisition:** ADC1 channel 0 (PA0) runs with DMA. The firmware keeps eight samples, converts them to a nominal 0–3.3 V range, and applies an exponential moving average with alpha 0.5. This is a filtered voltage reading, not a calibrated current measurement.
+- **Serial interface:** USART2 (PA2/PA3) transmits time, ADC voltage, PWM value, and speed. Reception uses 16-byte ASCII frames: the first four bytes identify a command and the remaining bytes contain its value. Implemented commands start or stop the timer interrupt (`0x01`, `0x02`), enable or disable PWM (`0x03`, `0x04`), set duty cycle or voltage (`0x05`, `0x07`), set direction (`0x06`), and write PID gain variables (`0x0B`, `0x0D`, `0x0F`).
 
 **FR**
 
-- Le firmware regroupe dans un même projet STM32Cube la mesure de vitesse par encodeur, l’acquisition de la tension du shunt, la commande PWM et direction, le PID discret et la télémétrie UART.
-- Les notebooks constituent une base de simulation du moteur et du correcteur, ainsi que de traitement des données série ; le dépôt ne présente pas de validation expérimentale quantitative ni de résultats de performance du correcteur.
-- La mesure de courant reste une tension ADC filtrée, sans conversion étalonnée en ampères. Les suites envisagées sont la caractérisation du shunt et de la chaîne de mesure, la validation de la réponse du moteur et la documentation du protocole UART et de résultats de tests reproductibles.
+- **Retour de vitesse :** TIM1 compte les impulsions de l’encodeur en quadrature. Toutes les 10 ms, le firmware convertit la variation du compteur en vitesse (tr/min) en supposant en dur 2 000 comptes par tour.
+- **Commande et actionnement :** le PID utilise l’écart entre sa consigne mémorisée et la valeur absolue de la vitesse mesurée. Son équation discrète met à jour une commande de tension, limitée à 0–24 V puis convertie linéairement en rapport cyclique PWM sur le canal 1 de TIM3. Le signal de direction est géré séparément.
+- **Acquisition de tension :** ADC1 canal 0 (PA0) fonctionne avec le DMA. Le firmware conserve huit échantillons, les convertit dans une plage nominale de 0 à 3,3 V et applique une moyenne exponentielle avec alpha = 0,5. Il s’agit d’une tension filtrée, pas d’une mesure de courant étalonnée.
+- **Liaison série :** USART2 (PA2/PA3) transmet le temps, la tension ADC, la valeur PWM et la vitesse. La réception utilise des trames ASCII de 16 octets : les quatre premiers identifient la commande, les octets suivants portent sa valeur. Les commandes implémentées démarrent ou arrêtent l’interruption du timer (`0x01`, `0x02`), activent ou désactivent le PWM (`0x03`, `0x04`), règlent le rapport cyclique ou la tension (`0x05`, `0x07`), règlent le sens (`0x06`) et écrivent les variables de gain du PID (`0x0B`, `0x0D`, `0x0F`).
 
-## Getting started
+## Technical decisions / Choix techniques
 
-### Requirements
+**EN**
 
-- STM32CubeIDE with STM32F4 device support.
-- An STM32F411RE target, an ST-LINK programmer/debugger, and the motor, encoder and driver hardware wired for the project configuration.
-- A 3.3 V USB-to-UART adapter or equivalent serial connection to USART2 (PA2/PA3), plus a serial monitor for the optional telemetry example.
+- The firmware is an STM32Cube HAL project generated/configured with STM32CubeMX 6.8.0. TIM1 handles encoder counting, TIM2 schedules the 10 ms control update, TIM3 generates PWM, and USART2 is configured for 115200 baud, 8N1. The `.ioc` file is the source for inspecting the peripheral configuration.
+- The controller output is non-negative and limited to 24 V-equivalent command; speed is compared by magnitude and direction is a separate GPIO signal. This is not a signed, bidirectional speed controller.
+- UART gain commands update `Kp`, `Ki`, and `Kd`, but the discrete PID coefficients are calculated only during initialization. Changing gains at runtime therefore does not update the coefficients used by the control equation.
+- The encoder conversion assumes 2,000 counts per revolution and a 10 ms measurement interval. That assumption must match the encoder, its wiring, and any mechanical gearing before RPM values can be interpreted as calibrated measurements.
+- The notebooks use nominal motor-model parameters (including inductance, resistance, motor constant, and inertia) as simulation inputs. The repository does not document these as experimentally identified values. The ADC-to-voltage scaling likewise has no documented calibration of the complete shunt and analog measurement chain.
 
-### Build and flash
+**FR**
 
-1. Clone this repository and open STM32CubeIDE.
-2. Import `MCC_IPS/MCC_IPS_FINISHED` using **File → Import → Existing Projects into Workspace**.
-3. Build the `MCC_IPS_FINISHED` project, connect the target through ST-LINK, then use **Run → Debug** (or **Run**) to program it.
-4. For serial access, connect USART2 at **115200 baud, 8 data bits, no parity, 1 stop bit (8N1)**.
+- Le firmware est un projet STM32Cube HAL configuré avec STM32CubeMX 6.8.0. TIM1 compte l’encodeur, TIM2 cadence la mise à jour de commande à 10 ms, TIM3 génère le PWM et USART2 est configuré à 115200 bauds, 8N1. Le fichier `.ioc` permet d’inspecter la configuration des périphériques.
+- La sortie du correcteur est non négative et limitée à une commande équivalente à 24 V ; la vitesse est comparée en valeur absolue et le sens est transmis par un GPIO distinct. Il ne s’agit donc pas d’un asservissement bidirectionnel à consigne signée.
+- Les commandes UART de gain modifient `Kp`, `Ki` et `Kd`, mais les coefficients du PID discret ne sont calculés qu’à l’initialisation. Un changement de gain à l’exécution ne met donc pas à jour les coefficients utilisés par l’équation de commande.
+- La conversion de l’encodeur suppose 2 000 comptes par tour et un intervalle de mesure de 10 ms. Cette hypothèse doit correspondre à l’encodeur, à son câblage et à l’éventuelle réduction mécanique avant d’interpréter les tr/min comme une mesure étalonnée.
+- Les notebooks utilisent des paramètres nominaux du modèle moteur (notamment inductance, résistance, constante moteur et inertie) comme entrées de simulation. Le dépôt ne les documente pas comme des valeurs identifiées expérimentalement. De même, l’échelle ADC-tension ne s’accompagne pas d’une calibration documentée de l’ensemble shunt et chaîne analogique.
 
-The `.ioc` file was created with STM32CubeMX 6.8.0. It can be opened to inspect the peripheral configuration; regenerate code only when needed, since generated files contain user code.
+## Experiments and limits / Expériences et limites
 
-### Example: start telemetry
+**EN** The repository demonstrates an integrated firmware path for encoder feedback, PWM output, ADC voltage acquisition, and UART telemetry. The simulation notebooks contain saved outputs for modeled unloaded/loaded cases and different sample periods; these are results of the notebook models, not measurements of the assembled motor. `stm32_com.ipynb` contains serial measurement and post-processing routines, but the repository does not provide a documented, calibrated data set or a quantitative comparison sufficient to validate controller performance or rank the methods.
 
-The firmware receives fixed-size 16-byte ASCII command frames. With `pyserial` installed and the board connected to `COM3`, this sends the `0x01` start command and reads one telemetry line:
+There is also an important interface limitation: the PID reference is initialized to zero and is not set by any of the implemented UART commands. UART can change direct PWM/voltage, direction, and gain variables, but it does not provide a speed-reference command. Further validation would require exposing and documenting that reference, checking the encoder scale and sensor calibration, and recording repeatable motor tests with their hardware and load conditions.
+
+**FR** Le dépôt met en œuvre une chaîne firmware intégrant retour d’encodeur, sortie PWM, acquisition de tension ADC et télémétrie UART. Les notebooks de simulation contiennent des résultats sauvegardés pour des modèles à vide et en charge et différentes périodes d’échantillonnage ; ce sont des résultats de simulation, pas des mesures du moteur assemblé. `stm32_com.ipynb` contient des routines d’acquisition série et de post-traitement, mais le dépôt ne fournit ni jeu de données étalonné et documenté, ni comparaison quantitative suffisante pour valider les performances du correcteur ou classer les méthodes.
+
+Une limite importante concerne l’interface : la consigne du PID est initialisée à zéro et aucune commande UART implémentée ne permet de la modifier. L’UART peut changer directement le PWM ou la tension, le sens et les variables de gain, mais ne propose pas de commande de consigne de vitesse. Une validation complémentaire nécessiterait d’exposer et documenter cette consigne, de vérifier l’échelle de l’encodeur et l’étalonnage des capteurs, puis d’effectuer des essais moteur répétables en précisant le matériel et la charge.
+
+## Getting started / Démarrage
+
+### Firmware
+
+**EN**
+
+Requirements: STM32CubeIDE with STM32F4 device support, an STM32F411RE target, an ST-LINK programmer/debugger, and a motor, encoder, and driver wired to the project configuration. For serial communication, use a 3.3 V-compatible USB-to-UART adapter on USART2 (PA2/PA3).
+
+1. Open STM32CubeIDE and import `MCC_IPS/MCC_IPS_FINISHED` using **File → Import → Existing Projects into Workspace**.
+2. Build the `MCC_IPS_FINISHED` project, connect the board through ST-LINK, and use **Run → Debug** (or **Run**) to program it.
+3. To inspect the peripheral setup, open `MCC_IPS/MCC_IPS_FINISHED/MCC_IPS_FINISHED.ioc` in STM32CubeMX. Regenerate code only when needed because generated files also contain user code.
+4. Configure the serial monitor for **115200 baud, 8 data bits, no parity, 1 stop bit (8N1)**.
+
+**FR**
+
+Prérequis : STM32CubeIDE avec le support des composants STM32F4, une cible STM32F411RE, un programmateur/débogueur ST-LINK, ainsi qu’un moteur, un encodeur et un étage de puissance câblés selon la configuration du projet. Pour la liaison série, utiliser un adaptateur USB-UART compatible 3,3 V sur USART2 (PA2/PA3).
+
+1. Ouvrir STM32CubeIDE et importer `MCC_IPS/MCC_IPS_FINISHED` via **File → Import → Existing Projects into Workspace**.
+2. Compiler le projet `MCC_IPS_FINISHED`, connecter la carte en ST-LINK et utiliser **Run → Debug** (ou **Run**) pour la programmer.
+3. Pour inspecter la configuration des périphériques, ouvrir `MCC_IPS/MCC_IPS_FINISHED/MCC_IPS_FINISHED.ioc` dans STM32CubeMX. Ne régénérer le code qu’en cas de besoin, car les fichiers générés contiennent également du code utilisateur.
+4. Configurer le moniteur série à **115200 bauds, 8 bits de données, sans parité, 1 bit d’arrêt (8N1)**.
+
+#### Serial example / Exemple série
+
+The following example sends the 16-byte `0x01` frame, which enables the timer interrupt, then reads one telemetry line. Replace `COM3` with the port assigned to the adapter. The firmware starts the timer during initialization as well; this command re-enables its interrupt if it has been stopped.
+
+L’exemple suivant envoie la trame de 16 octets `0x01`, qui active l’interruption du timer, puis lit une ligne de télémétrie. Remplacer `COM3` par le port attribué à l’adaptateur. Le firmware démarre également le timer à l’initialisation ; cette commande réactive son interruption s’il a été arrêté.
 
 ```console
 python -m pip install pyserial
@@ -103,8 +135,34 @@ with serial.Serial("COM3", 115200, timeout=1) as port:
     print(port.readline().decode(errors="replace").strip())
 ```
 
-The firmware also defines command identifiers for stopping the periodic loop (`0x02`), enabling/disabling PWM (`0x03`/`0x04`), setting duty cycle (`0x05`), setting direction (`0x06`), setting voltage (`0x07`) and writing the PID gain variables (`0x0B`, `0x0D`, `0x0F`). The gain commands currently do not recalculate the discrete PID coefficients. See `MCC_IPS/MCC_IPS_FINISHED/Core/Src/comm.c` for the current frame parsing and command behavior.
+### Notebooks
 
-## Acknowledgment
+**EN** The notebooks require Jupyter and import `numpy`, `python-control` (the `control` module), `control_plotly`, `matplotlib`, and/or `pyserial`, depending on the notebook. No dependency manifest or pinned versions are provided. Once a compatible environment is available, start a notebook from the repository root, for example:
 
-The initial code base was provided by M. Kerhoas: [DC motor control drivers](https://web.enib.fr/~kerhoas/asserv_mcc_drivers.html).
+**FR** Les notebooks nécessitent Jupyter et importent `numpy`, `python-control` (module `control`), `control_plotly`, `matplotlib` et/ou `pyserial`, selon le notebook. Le dépôt ne fournit ni manifeste de dépendances ni versions figées. Une fois un environnement compatible installé, lancer un notebook depuis la racine du dépôt, par exemple :
+
+```console
+python -m jupyter lab SIM_Moteur.ipynb
+```
+
+The serial notebook also expects a connected board and a correctly configured serial port. / Le notebook série nécessite également une carte connectée et un port série correctement configuré.
+
+## Repository structure / Structure du dépôt
+
+| Path | Purpose / Rôle |
+| --- | --- |
+| `MCC_IPS/MCC_IPS_FINISHED/Core/Src/main.c` | Firmware initialization and 10 ms control callback / Initialisation et callback de commande à 10 ms |
+| `MCC_IPS/MCC_IPS_FINISHED/Core/Src/speed.c` | Encoder-based speed estimate / Estimation de vitesse par encodeur |
+| `MCC_IPS/MCC_IPS_FINISHED/Core/Src/pidFilter.c` | Discrete PID implementation / Implémentation du PID discret |
+| `MCC_IPS/MCC_IPS_FINISHED/Core/Src/pwmCommand.c` | PWM and voltage-to-duty conversion / PWM et conversion tension-rapport cyclique |
+| `MCC_IPS/MCC_IPS_FINISHED/Core/Src/current.c` | ADC sampling and voltage filtering / Acquisition ADC et filtrage de tension |
+| `MCC_IPS/MCC_IPS_FINISHED/Core/Src/comm.c` | UART telemetry and command parsing / Télémétrie UART et analyse des commandes |
+| `MCC_IPS/MCC_IPS_FINISHED/MCC_IPS_FINISHED.ioc` | STM32CubeMX peripheral configuration / Configuration des périphériques STM32CubeMX |
+| `SIM_Moteur.ipynb`, `SIM_MOTEUR_MOTEURS.ipynb` | Motor and controller simulations / Simulations du moteur et du correcteur |
+| `stm32_com.ipynb` | Serial acquisition and data post-processing / Acquisition série et post-traitement |
+
+## Acknowledgments / Remerciements
+
+**EN** The initial code base was provided by M. Kerhoas: [DC motor control drivers](https://web.enib.fr/~kerhoas/asserv_mcc_drivers.html).
+
+**FR** Le code initial a été fourni par M. Kerhoas : [drivers de commande de moteur à courant continu](https://web.enib.fr/~kerhoas/asserv_mcc_drivers.html).
