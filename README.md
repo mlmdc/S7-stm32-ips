@@ -1,7 +1,11 @@
 # STM32 IPS — DC motor speed control / Asservissement en vitesse d’un moteur à courant continu
 
-🇬🇧 **EN -** Firmware and supporting notebooks for studying the speed control and measurement of a brushless permanent magnet DC motor with an STM32F411RE.
+🇬🇧 **EN -** Firmware and supporting notebooks for studying the speed control and measurement of a brushless permanent magnet DC motor with an STM32F411RE. <br>
 🇫🇷 **FR -** Firmware et notebooks pour l'étude du contrôle de la vitesse et de la mesure d'un moteur à courant continu à aimants permanents, à l'aide d'un STM32F411RE.
+
+![Target Buehler DC Motor](images/1-13-044-0XX_DC_Motor_51x73.png)
+
+*Example modeled motor responses under two operating conditions.*
 
 [Back to portfolio](https://github.com/mlmdc) · [Contents / Sommaire](#contents--sommaire) · [Rapport / Report](C-5-article.pdf)
 
@@ -27,13 +31,14 @@
 
 ## Problem and approach / Problématique et approche
 
+![Simulated responses for two motor operating conditions](images/compar_syst_moteur_libre_charge.png)
+
+*Example modeled motor responses under two operating conditions.*
+
 🇬🇧 **EN -** The firmware brings speed feedback, motor actuation, and auxiliary voltage acquisition together on a microcontroller. Its main inputs are encoder counts, the ADC voltage, a speed reference held by the firmware, and UART commands. A timer schedules the speed estimate and controller update; the controller output is converted to PWM duty cycle, while the shunt-voltage measurement is sent as telemetry. Motor direction is controlled separately from the speed loop.
 
 The notebooks address the same system from two complementary angles: `SIM_Moteur.ipynb` and `SIM_MOTEUR_MOTEURS.ipynb` simulate motor and controller behavior under different model and sampling assumptions; `stm32_com.ipynb` explores serial communication, data acquisition, and post-processing. These models can help formulate experiments, but their outputs do not establish how the physical motor performs.
 
-![Simulated responses for two motor operating conditions](images/compar_syst_moteur_libre_charge.png)
-
-*Example modeled motor responses under two operating conditions.*
 
 <br>
 
@@ -61,9 +66,6 @@ flowchart LR
     Firmware --> Direction
 ```
 
-![Motor control interface](images/IHM_controle_MCV.png)
-
-*Control interface included in the project materials.*
 
 ## Firmware methods / Méthodes du firmware
 
@@ -105,13 +107,13 @@ flowchart LR
 
 ## Experiments and limits / Expériences et limites
 
+![Example serial capture of commanded and measured motor speed](images/exemple_951_mesures_mcv_controle.png)
+
+*Example serial capture for illustration only; it is not a calibrated validation dataset.*
+
 🇬🇧 **EN -** The repository demonstrates an integrated firmware path for encoder feedback, PWM output, ADC voltage acquisition, and UART telemetry. The simulation notebooks contain saved outputs for modeled unloaded/loaded cases and different sample periods; these are results of the notebook models, not measurements of the assembled motor. `stm32_com.ipynb` contains serial measurement and post-processing routines, but the repository does not provide a documented, calibrated data set or a quantitative comparison sufficient to validate controller performance or rank the methods.
 
 There is also an important interface limitation: the PID reference is initialized to zero and is not set by any of the implemented UART commands. UART can change direct PWM/voltage, direction, and gain variables, but it does not provide a speed-reference command. Further validation would require exposing and documenting that reference, checking the encoder scale and sensor calibration, and recording repeatable motor tests with their hardware and load conditions.
-
-![Example serial capture of commanded and measured motor speed](images/exemple_41_mesures_mcv_controle.png)
-
-*Example serial capture for illustration only; it is not a calibrated validation dataset.*
 
 <br>
 
