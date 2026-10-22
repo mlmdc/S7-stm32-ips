@@ -15,6 +15,7 @@
 - [Getting started / Démarrage](#getting-started--démarrage)
 - [Repository structure / Structure du dépôt](#repository-structure--structure-du-dépôt)
 - [Acknowledgments / Remerciements](#acknowledgments--remerciements)
+- [License](#license)
 
 ## Overview / Présentation
 
@@ -29,6 +30,10 @@
 🇬🇧 **EN -** The firmware brings speed feedback, motor actuation, and auxiliary voltage acquisition together on a microcontroller. Its main inputs are encoder counts, the ADC voltage, a speed reference held by the firmware, and UART commands. A timer schedules the speed estimate and controller update; the controller output is converted to PWM duty cycle, while the shunt-voltage measurement is sent as telemetry. Motor direction is controlled separately from the speed loop.
 
 The notebooks address the same system from two complementary angles: `SIM_Moteur.ipynb` and `SIM_MOTEUR_MOTEURS.ipynb` simulate motor and controller behavior under different model and sampling assumptions; `stm32_com.ipynb` explores serial communication, data acquisition, and post-processing. These models can help formulate experiments, but their outputs do not establish how the physical motor performs.
+
+![Simulated responses for two motor operating conditions](images/compar_syst_moteur_libre_charge.png)
+
+*Example modeled motor responses under two operating conditions.*
 
 <br>
 
@@ -55,6 +60,10 @@ flowchart LR
     Firmware --> PWM
     Firmware --> Direction
 ```
+
+![Motor control interface](images/IHM_controle_MCV.png)
+
+*Control interface included in the project materials.*
 
 ## Firmware methods / Méthodes du firmware
 
@@ -100,6 +109,10 @@ flowchart LR
 
 There is also an important interface limitation: the PID reference is initialized to zero and is not set by any of the implemented UART commands. UART can change direct PWM/voltage, direction, and gain variables, but it does not provide a speed-reference command. Further validation would require exposing and documenting that reference, checking the encoder scale and sensor calibration, and recording repeatable motor tests with their hardware and load conditions.
 
+![Example serial capture of commanded and measured motor speed](images/exemple_41_mesures_mcv_controle.png)
+
+*Example serial capture for illustration only; it is not a calibrated validation dataset.*
+
 <br>
 
 🇫🇷 **FR -** Le dépôt met en œuvre une chaîne firmware intégrant retour d’encodeur, sortie PWM, acquisition de tension ADC et télémétrie UART. Les notebooks de simulation contiennent des résultats sauvegardés pour des modèles à vide et en charge et différentes périodes d’échantillonnage ; ce sont des résultats de simulation, pas des mesures du moteur assemblé. `stm32_com.ipynb` contient des routines d’acquisition série et de post-traitement, mais le dépôt ne fournit ni jeu de données étalonné et documenté, ni comparaison quantitative suffisante pour valider les performances du correcteur ou classer les méthodes.
@@ -111,6 +124,19 @@ Une limite importante concerne l’interface : la consigne du PID est initialis�
 ### Firmware
 
 🇬🇧 **EN -** Requirements: STM32CubeIDE with STM32F4 device support, an STM32F411RE target, an ST-LINK programmer/debugger, and a motor, encoder, and driver wired to the project configuration. For serial communication, use a 3.3 V-compatible USB-to-UART adapter on USART2 (PA2/PA3).
+
+The diagram shows how the hardware and notebooks fit together: the simulation notebooks use a motor model, while `stm32_com.ipynb` can exchange commands and telemetry with the running firmware over UART.
+
+```mermaid
+flowchart LR
+    IDE[STM32CubeIDE] -->|Build and flash via ST-LINK| FW[STM32F411RE firmware]
+    FW -->|PWM and direction| Driver[Motor driver]
+    Driver --> Motor[DC motor]
+    Motor -->|Encoder feedback| FW
+    FW -->|Telemetry and commands| UART[USB-to-UART adapter]
+    UART <-->|Read telemetry and send commands| SerialNB[stm32_com.ipynb]
+    SimNB[Simulation notebooks] <-->|Simulated inputs and responses| Model[Motor and controller model]
+```
 
 1. Open STM32CubeIDE and import `MCC_IPS/MCC_IPS_FINISHED` using **File → Import → Existing Projects into Workspace**.
 2. Build the `MCC_IPS_FINISHED` project, connect the board through ST-LINK, and use **Run → Debug** (or **Run**) to program it.
@@ -163,3 +189,7 @@ The serial notebook also expects a connected board and a correctly configured se
 **EN** The initial code base was provided by M. Kerhoas: [DC motor control drivers](https://web.enib.fr/~kerhoas/asserv_mcc_drivers.html).
 
 **FR** Le code initial a été fourni par M. Kerhoas : [drivers de commande de moteur à courant continu](https://web.enib.fr/~kerhoas/asserv_mcc_drivers.html).
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
