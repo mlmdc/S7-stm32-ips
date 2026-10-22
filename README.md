@@ -1,7 +1,7 @@
 # STM32 IPS — DC motor speed control / Asservissement en vitesse d’un moteur à courant continu
 
-🇬🇧 **EN -** Firmware and supporting notebooks for studying the speed control and measurement of a brushed DC motor with an STM32F411RE.
-🇫🇷 **FR -** 
+🇬🇧 **EN -** Firmware and supporting notebooks for studying the speed control and measurement of a brushless permanent magnet DC motor with an STM32F411RE.
+🇫🇷 **FR -** Firmware et notebooks pour l'étude du contrôle de la vitesse et de la mesure d'un moteur à courant continu à aimants permanents, à l'aide d'un STM32F411RE.
 
 [Back to portfolio](https://github.com/mlmdc) · [Contents / Sommaire](#contents--sommaire) · [Rapport / Report](C-5-article.pdf)
 
