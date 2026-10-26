@@ -7,7 +7,7 @@
 
 *Example modeled motor responses under two operating conditions.*
 
-[Back to portfolio](https://github.com/mlmdc) · [Contents / Sommaire](#contents--sommaire) · [Rapport / Report](C-5-article.pdf)
+[Back to portfolio](https://mlmdc.github.io/mlmdc_portfolio/) · [Contents / Sommaire](#contents--sommaire) · [Rapport / Report](C-5-article.pdf)
 
 ## Contents / Sommaire
 
