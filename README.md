@@ -1,11 +1,13 @@
-# STM32 IPS — DC motor speed control / Asservissement en vitesse d’un moteur à courant continu
+<p align="center">
+  <img src="images/1-13-044-0XX_DC_Motor_51x73.png" alt="Moteur d'exemple" width="70%">
+</p>
 
-🇬🇧 **EN -** Firmware and supporting notebooks for studying the speed control and measurement of a brushless permanent magnet DC motor with an STM32F411RE. <br>
-🇫🇷 **FR -** Firmware et notebooks pour l'étude du contrôle de la vitesse et de la mesure d'un moteur à courant continu à aimants permanents, à l'aide d'un STM32F411RE.
+<h1 align="center">STM32 IPS</h1>
 
-![Target Buehler DC Motor](images/1-13-044-0XX_DC_Motor_51x73.png)
-
-*Example modeled motor responses under two operating conditions.*
+<p align="left">
+  <strong>🇬🇧 EN - </strong> Firmware et notebooks pour l'étude du contrôle de la vitesse et de la mesure d'un moteur à courant continu à aimants permanents, à l'aide d'un STM32F411RE.<br>
+  <strong>🇫🇷 FR - </strong> Firmware and supporting notebooks for studying the speed control and measurement of a brushless permanent magnet DC motor with an STM32F411RE.
+</p>
 
 [Back to portfolio](https://mlmdc.github.io/mlmdc_portfolio/) · [Contents / Sommaire](#contents--sommaire) · [Rapport / Report](C-5-article.pdf)
 
@@ -31,14 +33,15 @@
 
 ## Problem and approach / Problématique et approche
 
-![Simulated responses for two motor operating conditions](images/compar_syst_moteur_libre_charge.png)
+<p align="center">
+  <img src="images/compar_syst_moteur_libre_charge.png" alt="Moteur d'exemple" width="70%">
+</p>
 
-*Example modeled motor responses under two operating conditions.*
+<p><em>FR : Comparaison de modèles dynamiques à vide et en charge. <br> EN: Comparison of dynamic models under no-load and loaded conditions.</em></p>
 
 🇬🇧 **EN -** The firmware brings speed feedback, motor actuation, and auxiliary voltage acquisition together on a microcontroller. Its main inputs are encoder counts, the ADC voltage, a speed reference held by the firmware, and UART commands. A timer schedules the speed estimate and controller update; the controller output is converted to PWM duty cycle, while the shunt-voltage measurement is sent as telemetry. Motor direction is controlled separately from the speed loop.
 
 The notebooks address the same system from two complementary angles: `SIM_Moteur.ipynb` and `SIM_MOTEUR_MOTEURS.ipynb` simulate motor and controller behavior under different model and sampling assumptions; `stm32_com.ipynb` explores serial communication, data acquisition, and post-processing. These models can help formulate experiments, but their outputs do not establish how the physical motor performs.
-
 
 <br>
 
@@ -88,7 +91,6 @@ flowchart LR
 ## Technical decisions / Choix techniques
 
 🇬🇧 **EN :**
-
 - The firmware is an STM32Cube HAL project generated/configured with STM32CubeMX 6.8.0. TIM1 handles encoder counting, TIM2 schedules the 10 ms control update, TIM3 generates PWM, and USART2 is configured for 115200 baud, 8N1. The `.ioc` file is the source for inspecting the peripheral configuration.
 - The controller output is non-negative and limited to 24 V-equivalent command; speed is compared by magnitude and direction is a separate GPIO signal. This is not a signed, bidirectional speed controller.
 - UART gain commands update `Kp`, `Ki`, and `Kd`, but the discrete PID coefficients are calculated only during initialization. Changing gains at runtime therefore does not update the coefficients used by the control equation.
@@ -98,7 +100,6 @@ flowchart LR
 <br>
 
 🇫🇷 **FR :**
-
 - Le firmware est un projet STM32Cube HAL configuré avec STM32CubeMX 6.8.0. TIM1 compte l’encodeur, TIM2 cadence la mise à jour de commande à 10 ms, TIM3 génère le PWM et USART2 est configuré à 115200 bauds, 8N1. Le fichier `.ioc` permet d’inspecter la configuration des périphériques.
 - La sortie du correcteur est non négative et limitée à une commande équivalente à 24 V ; la vitesse est comparée en valeur absolue et le sens est transmis par un GPIO distinct. Il ne s’agit donc pas d’un asservissement bidirectionnel à consigne signée.
 - Les commandes UART de gain modifient `Kp`, `Ki` et `Kd`, mais les coefficients du PID discret ne sont calculés qu’à l’initialisation. Un changement de gain à l’exécution ne met donc pas à jour les coefficients utilisés par l’équation de commande.
@@ -107,9 +108,12 @@ flowchart LR
 
 ## Experiments and limits / Expériences et limites
 
-![Example serial capture of commanded and measured motor speed](images/exemple_951_mesures_mcv_controle.png)
+<p align="center">
+  <img src="images/exemple_951_mesures_mcv_controle.png" alt="Exemple de commande en vitesse du moteur, à vide et en charge." width="70%">
+</p>
 
-*Example serial capture for illustration only; it is not a calibrated validation dataset.*
+<p><em>FR : Exemple de commande en vitesse du moteur, à vide et en charge. <br> EN: Example of motor speed control under no-load and loaded conditions.</em></p>
+
 
 🇬🇧 **EN -** The repository demonstrates an integrated firmware path for encoder feedback, PWM output, ADC voltage acquisition, and UART telemetry. The simulation notebooks contain saved outputs for modeled unloaded/loaded cases and different sample periods; these are results of the notebook models, not measurements of the assembled motor. `stm32_com.ipynb` contains serial measurement and post-processing routines, but the repository does not provide a documented, calibrated data set or a quantitative comparison sufficient to validate controller performance or rank the methods.
 
