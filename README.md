@@ -33,7 +33,7 @@
 
 ## Problem and approach / Problématique et approche
 
-<p align="center">
+<p align="left">
   <img src="images/compar_syst_moteur_libre_charge.png" alt="Moteur d'exemple" width="70%">
 </p>
 
@@ -108,7 +108,7 @@ flowchart LR
 
 ## Experiments and limits / Expériences et limites
 
-<p align="center">
+<p align="left">
   <img src="images/exemple_951_mesures_mcv_controle.png" alt="Exemple de commande en vitesse du moteur, à vide et en charge." width="70%">
 </p>
 
